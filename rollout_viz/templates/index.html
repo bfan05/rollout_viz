@@ -567,15 +567,36 @@
             </div>
         </div>
     </div>
-    
+    <!-- ROLLOUT_VIZ_EMBEDDED_PLACEHOLDER -->
     <script>
+        (function(){
+            var el = document.getElementById('rollout-viz-data');
+            if (el) { try { window.ROLLOUT_VIZ_EMBEDDED_DATA = JSON.parse(el.textContent); } catch(e) {} }
+        })();
         // State
         let allQuestions = [];
         let allSteps = [];
         let selectedQuestionId = null;
         
+        function initFromEmbeddedData() {
+            var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
+            if (!d) return;
+            allQuestions = d.questions || [];
+            allSteps = d.status && d.status.steps || [];
+            document.getElementById('totalQuestions').textContent = (d.status && d.status.question_count != null) ? d.status.question_count : '-';
+            document.getElementById('totalSteps').textContent = allSteps.length;
+            document.getElementById('totalRollouts').textContent = (d.status && d.status.total_entries != null) ? d.status.total_entries : '-';
+            renderQuestions(allQuestions);
+            setupTabs();
+            setupSearch();
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                initFromEmbeddedData();
+                return;
+            }
             loadStatus();
             loadQuestions();
             loadSteps();
@@ -763,6 +784,20 @@
                 card.classList.toggle('selected', card.dataset.questionId === questionId);
             });
             
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
+                var info = (d.questionInfo && d.questionInfo[questionId]) || {};
+                const detail = document.getElementById('questionDetail');
+                const questionNumber = allQuestions.find(q => q.id === questionId)?.question_number || 0;
+                document.getElementById('questionDetailTitle').textContent = `Question ${questionNumber}`;
+                const questionInfoBox = document.getElementById('questionInfoBox');
+                renderQuestionInfoBox(questionInfoBox, info.user_question || 'No question text available', info.ground_truth);
+                detail.style.display = 'block';
+                updateStepSelectorForQuestion(info.steps || []);
+                loadQuestionPlot(questionId);
+                return;
+            }
+            
             // Load question details
             fetch(`/api/question_info/${questionId}`)
                 .then(r => r.json())
@@ -808,6 +843,11 @@
             const container = document.getElementById('questionPlot');
             container.style.display = 'block';
             container.innerHTML = '<div class="loading">Loading accuracy plot...</div>';
+            
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA && window.ROLLOUT_VIZ_EMBEDDED_DATA.plotImages && window.ROLLOUT_VIZ_EMBEDDED_DATA.plotImages[questionId]) {
+                container.innerHTML = '<img src="data:image/png;base64,' + window.ROLLOUT_VIZ_EMBEDDED_DATA.plotImages[questionId] + '" alt="Question ' + questionId + ' Accuracy">';
+                return;
+            }
             
             fetch(`/api/plot/${questionId}`)
                 .then(r => r.json())
@@ -858,6 +898,18 @@
         
         // Load steps
         function loadSteps() {
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                allSteps = window.ROLLOUT_VIZ_EMBEDDED_DATA.status && window.ROLLOUT_VIZ_EMBEDDED_DATA.status.steps || [];
+                var select = document.getElementById('responseStepSelect');
+                select.innerHTML = '<option value="">-- Select a Step --</option>';
+                allSteps.forEach(function(step) {
+                    var option = document.createElement('option');
+                    option.value = step;
+                    option.textContent = 'Step ' + step;
+                    select.appendChild(option);
+                });
+                return;
+            }
             fetch('/api/steps')
                 .then(r => r.json())
                 .then(steps => {
@@ -876,6 +928,21 @@
         
         // Load question IDs for response selector
         function loadResponseQuestions() {
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                var questions = window.ROLLOUT_VIZ_EMBEDDED_DATA.questions || allQuestions;
+                var select = document.getElementById('responseQuestionSelect');
+                select.innerHTML = '<option value="">-- Select a Question --</option>';
+                questions.forEach(function(q) {
+                    var option = document.createElement('option');
+                    option.value = q.id;
+                    var questionNumber = q.question_number || 0;
+                    var idDisplay = q.id.length > 8 ? q.id.substring(0, 8) + '...' : q.id;
+                    option.textContent = 'Question ' + questionNumber + ' (' + idDisplay + ')';
+                    option.dataset.questionNumber = questionNumber;
+                    select.appendChild(option);
+                });
+                return;
+            }
             fetch('/api/questions')
                 .then(r => {
                     if (!r.ok) {
@@ -908,6 +975,33 @@
         function loadResponses(questionId, step) {
             const container = document.getElementById('responsesContainer');
             container.innerHTML = '<div class="loading">Loading responses...</div>';
+            
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
+                var respList = (d.responses && d.responses[questionId] && d.responses[questionId][String(step)]) || [];
+                var info = (d.questionInfo && d.questionInfo[questionId]) || {};
+                if (respList.length > 0) {
+                    var questionInfoBox = document.getElementById('responseQuestionInfoBox');
+                    renderQuestionInfoBox(questionInfoBox, info.user_question || '', info.ground_truth || '');
+                    questionInfoBox.style.display = 'block';
+                    var html = respList.map(function(resp, idx) {
+                        var output = escapeHtml(resp.output);
+                        output = renderBold(output);
+                        output = renderAsymptote(output);
+                        return '<div class="response-card ' + (resp.correct ? 'correct' : 'incorrect') + '">' +
+                            '<div class="response-header"><span>Response ' + (idx + 1) + '</span>' +
+                            '<span class="response-status ' + (resp.correct ? 'correct' : 'incorrect') + '">' + (resp.correct ? 'Correct' : 'Incorrect') + '</span></div>' +
+                            '<div class="response-text">' + output + '</div></div>';
+                    }).join('');
+                    container.innerHTML = html;
+                    var mathElements = container.querySelectorAll('.response-text');
+                    renderMathJax(mathElements);
+                } else {
+                    document.getElementById('responseQuestionInfoBox').style.display = 'none';
+                    container.innerHTML = '<div class="empty-state">No responses found for this question and step</div>';
+                }
+                return;
+            }
             
             fetch(`/api/responses/${questionId}/${step}`)
                 .then(r => r.json())
@@ -967,6 +1061,17 @@
         document.getElementById('responseQuestionSelect').addEventListener('change', function() {
             const questionId = this.value;
             if (questionId) {
+                if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                    var info = (window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo && window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo[questionId]) || {};
+                    updateStepSelectorForQuestion(info.steps || []);
+                    var questionInfoBox = document.getElementById('responseQuestionInfoBox');
+                    renderQuestionInfoBox(questionInfoBox, info.user_question || '', info.ground_truth || '');
+                    questionInfoBox.style.display = 'block';
+                    var step = document.getElementById('responseStepSelect').value;
+                    if (step) loadResponses(questionId, step);
+                    else document.getElementById('responsesContainer').innerHTML = '<div class="empty-state">Select a training step to view responses</div>';
+                    return;
+                }
                 // Load question info to get available steps and show question box
                 fetch(`/api/question_info/${questionId}`)
                     .then(r => r.json())
