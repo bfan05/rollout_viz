@@ -57,27 +57,36 @@ def extract_user_question(input_text: str) -> str:
 
 
 def load_rollout_data_from_dir(data_dir: str, max_steps: int = 500) -> List[Dict[str, Any]]:
-    """Load and parse all JSONL files from a directory (e.g. 1.jsonl, 2.jsonl, ...)."""
+    """
+    Load and parse rollout data from a directory.
+
+    Supports two formats:
+    - Multi-file: 1.jsonl, 2.jsonl, ... where the filename encodes the step.
+    - Single-file: rollouts.jsonl where each line has a `step` field (see DATA_FORMAT.md).
+    """
     data = []
     if not data_dir or not os.path.isdir(data_dir):
         return data
 
-    jsonl_files = glob.glob(os.path.join(data_dir, "*.jsonl"))
+    # Prefer the single-file rollouts.jsonl format if present.
+    rollouts_path = os.path.join(data_dir, "rollouts.jsonl")
+    if os.path.isfile(rollouts_path):
+        jsonl_files = [rollouts_path]
+        use_filename_steps = False
+    else:
+        jsonl_files = glob.glob(os.path.join(data_dir, "*.jsonl"))
+        use_filename_steps = True
 
-    def get_step_number(filepath: str) -> int:
-        filename = os.path.basename(filepath)
-        try:
-            return int(filename.replace(".jsonl", ""))
-        except ValueError:
-            return 999999
+        def get_step_number(filepath: str) -> int:
+            filename = os.path.basename(filepath)
+            try:
+                return int(filename.replace(".jsonl", ""))
+            except ValueError:
+                return 999999
 
-    jsonl_files = sorted(jsonl_files, key=get_step_number)[:max_steps]
+        jsonl_files = sorted(jsonl_files, key=get_step_number)
 
     for file_path in jsonl_files:
-        try:
-            step = int(os.path.basename(file_path).replace(".jsonl", ""))
-        except ValueError:
-            continue
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -85,12 +94,29 @@ def load_rollout_data_from_dir(data_dir: str, max_steps: int = 500) -> List[Dict
                     continue
                 try:
                     entry = json.loads(line)
-                    entry["step"] = step
-                    entry = normalize_entry(entry)
-                    if entry.get("question_id") or entry.get("input"):
-                        data.append(entry)
                 except json.JSONDecodeError:
                     continue
+
+                if use_filename_steps:
+                    # Multi-file format: derive step from filename (1.jsonl, 2.jsonl, ...).
+                    try:
+                        step = int(os.path.basename(file_path).replace(".jsonl", ""))
+                    except ValueError:
+                        continue
+                    entry["step"] = step
+                else:
+                    # Single-file rollouts.jsonl: trust `step` field on each entry.
+                    step = entry.get("step", 0)
+                    if not isinstance(step, int):
+                        # Skip entries with invalid or missing step.
+                        continue
+
+                if step > max_steps:
+                    continue
+
+                entry = normalize_entry(entry)
+                if entry.get("question_id") or entry.get("input"):
+                    data.append(entry)
     return data
 
 
