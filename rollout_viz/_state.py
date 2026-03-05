@@ -132,6 +132,7 @@ def flush_wandb() -> None:
     if _use_wandb and _wandb.get_wandb_run() is not None:
         data = _get_data()
         _wandb.log_full_accuracy_series(data)
+        _wandb.log_interactive_visualization(data)
 
 
 def is_standalone_running() -> bool:
