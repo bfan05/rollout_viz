@@ -1,0 +1,8 @@
+flask>=2.0
+matplotlib>=3.5
+werkzeug>=2.0
+wandb>=0.15.0
+
+[dev]
+pytest
+pytest-cov

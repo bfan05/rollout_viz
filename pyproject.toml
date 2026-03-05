@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rollout-viz"
+version = "0.1.0"
+description = "Wandb-integrated rollout accuracy visualization with optional standalone web UI"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = []
+keywords = ["wandb", "rollout", "visualization", "accuracy", "training"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "flask>=2.0",
+    "matplotlib>=3.5",
+    "werkzeug>=2.0",
+    "wandb>=0.15.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[project.scripts]
+rollout-viz = "rollout_viz.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rollout_viz*"]
+
+[tool.setuptools.package-data]
+rollout_viz = ["templates/*"]

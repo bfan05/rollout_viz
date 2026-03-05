@@ -1,0 +1,24 @@
+Metadata-Version: 2.4
+Name: rollout-viz
+Version: 0.1.0
+Summary: Wandb-integrated rollout accuracy visualization with optional standalone web UI
+License: MIT
+Keywords: wandb,rollout,visualization,accuracy,training
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: flask>=2.0
+Requires-Dist: matplotlib>=3.5
+Requires-Dist: werkzeug>=2.0
+Requires-Dist: wandb>=0.15.0
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
