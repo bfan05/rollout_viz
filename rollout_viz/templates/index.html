@@ -603,6 +603,39 @@
             setupTabs();
             setupSearch();
         });
+
+        // Periodically refresh data in standalone mode so the UI updates
+        // automatically as new rollouts are written during training.
+        (function setupAutoRefresh() {
+            // Do not auto-refresh when using the embedded HTML-in-WandB mode,
+            // since that uses static data injected at render time.
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                return;
+            }
+
+            const REFRESH_INTERVAL_MS = 5000; // 5 seconds
+
+            setInterval(() => {
+                // Refresh high-level stats and question list.
+                loadStatus();
+                loadQuestions();
+                loadSteps();
+                loadResponseQuestions();
+
+                // If a question is currently selected, refresh its plot.
+                if (selectedQuestionId) {
+                    loadQuestionPlot(selectedQuestionId);
+
+                    // If a question and step are selected in the Responses tab,
+                    // refresh the responses as well.
+                    const qSelect = document.getElementById('responseQuestionSelect');
+                    const stepSelect = document.getElementById('responseStepSelect');
+                    if (qSelect && stepSelect && qSelect.value && stepSelect.value) {
+                        loadResponses(qSelect.value, stepSelect.value);
+                    }
+                }
+            }, REFRESH_INTERVAL_MS);
+        })();
         
         // Tab switching
         function setupTabs() {

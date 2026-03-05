@@ -12,6 +12,7 @@ from . import _wandb
 # Global state
 _data_dir: Optional[str] = None
 _use_wandb: bool = True
+_write_to_dir: bool = True
 _in_memory_data: List[Dict[str, Any]] = []
 _in_memory_lock = threading.Lock()
 _standalone_server_thread: Optional[threading.Thread] = None
@@ -26,6 +27,8 @@ def init(
     data_dir: Optional[str] = None,
     standalone_port: int = 5000,
     run_standalone: bool = False,
+    run: Any = None,
+    write_to_dir: Optional[bool] = None,
     **wandb_kwargs: Any,
 ) -> None:
     """
@@ -42,24 +45,29 @@ def init(
                         the UI updates as rollouts are generated (can be used with or without wandb).
         **wandb_kwargs: Passed to wandb.init() if we start a new run (e.g. config=...).
     """
-    global _data_dir, _use_wandb, _standalone_port, _initialized, _standalone_server_thread
+    global _data_dir, _use_wandb, _write_to_dir, _standalone_port, _initialized, _standalone_server_thread
 
     _data_dir = data_dir
     _use_wandb = use_wandb
+    if write_to_dir is not None:
+        _write_to_dir = write_to_dir
     _standalone_port = standalone_port
     _initialized = True
 
     if use_wandb:
         try:
             import wandb
-            run = wandb.run
-            if run is None:
+            # If a specific wandb.Run instance was provided, attach directly to it.
+            active_run = run
+            if active_run is None:
+                active_run = wandb.run
+            if active_run is None:
                 kwargs = {"project": project, "name": name, **wandb_kwargs}
                 kwargs = {k: v for k, v in kwargs.items() if v is not None}
                 wandb.init(**kwargs)
-                run = wandb.run
-            if run is not None:
-                _wandb.set_wandb_run(run)
+                active_run = wandb.run
+            if active_run is not None:
+                _wandb.set_wandb_run(active_run)
         except Exception:
             _wandb.set_wandb_run(None)
 
@@ -117,7 +125,7 @@ def log_rollout(entry: Dict[str, Any]) -> None:
     with _in_memory_lock:
         _in_memory_data.append(normalized)
 
-    if _data_dir:
+    if _data_dir and _write_to_dir:
         step_file = os.path.join(_data_dir, f"{step}.jsonl")
         with open(step_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
