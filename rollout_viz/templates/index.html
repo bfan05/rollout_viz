@@ -719,7 +719,9 @@
             align-items: flex-end;
             gap: 2px;
             flex: 1;
+            height: 100%;
             min-width: 120px;
+            min-height: 0;
         }
         .length-distribution .histogram-bar {
             flex: 1;
@@ -797,7 +799,7 @@
                     </tbody>
                 </table>
             </div>
-            <div id="expandableDetailPlaceholder">
+            <div id="expandableDetailParking" style="display: none;" aria-hidden="true">
                 <div class="expandable-detail" id="expandableDetail">
                 <div class="detail-section detail-section-question-preview" id="expandRawQuestionSection">
                     <h4>Question preview</h4>
@@ -965,22 +967,47 @@
             renderTableBody(rows);
         }
         
-        function ensureDetailInPlaceholder() {
-            var detail = document.getElementById('expandableDetail');
-            var placeholder = document.getElementById('expandableDetailPlaceholder');
-            if (detail && placeholder && detail.parentElement !== placeholder) {
-                placeholder.appendChild(detail);
-            }
+        function getDetailParking() {
+            return document.getElementById('expandableDetailParking');
         }
 
-        function renderTableBody(rows) {
-            ensureDetailInPlaceholder();
-            selectedQuestionId = null;
+        function removeExistingDetailRow() {
+            var tbody = document.getElementById('questionsTableBody');
+            if (!tbody) return null;
+            var detailRow = tbody.querySelector('tr.detail-row');
+            if (detailRow && detailRow.parentElement) {
+                detailRow.parentElement.removeChild(detailRow);
+            }
+            return detailRow;
+        }
+
+        function parkDetail() {
             var detail = document.getElementById('expandableDetail');
+            var parking = getDetailParking();
+            removeExistingDetailRow();
             if (detail) {
                 detail.classList.remove('visible');
                 detail.style.display = 'none';
             }
+            if (detail && parking && detail.parentElement !== parking) {
+                parking.appendChild(detail);
+            }
+        }
+
+        function createDetailRowAfter(rowEl) {
+            if (!rowEl || !rowEl.parentElement) return null;
+            var detailRow = document.createElement('tr');
+            detailRow.className = 'detail-row';
+            var detailCell = document.createElement('td');
+            detailCell.colSpan = 7;
+            detailRow.appendChild(detailCell);
+            rowEl.parentElement.insertBefore(detailRow, rowEl.nextSibling);
+            return detailRow;
+        }
+
+        function renderTableBody(rows) {
+            selectedQuestionId = null;
+            parkDetail();
             var tbody = document.getElementById('questionsTableBody');
             var query = (document.getElementById('tableSearch') || {}).value || '';
             var q = query.toLowerCase().trim();
@@ -1012,22 +1039,21 @@
         
         function toggleExpandRow(questionId, steps, rowEl) {
             var detail = document.getElementById('expandableDetail');
-            var placeholder = document.getElementById('expandableDetailPlaceholder');
-            if (!detail || !placeholder) return;
+            if (!detail || !rowEl) return;
             var wasExpanded = selectedQuestionId === questionId;
-            document.querySelectorAll('.data-table tbody tr').forEach(function(r) { r.classList.remove('expanded'); });
-            ensureDetailInPlaceholder();
+            document.querySelectorAll('.data-table tbody tr.expanded').forEach(function(r) { r.classList.remove('expanded'); });
+            parkDetail();
             if (wasExpanded) {
                 selectedQuestionId = null;
-                detail.classList.remove('visible');
-                detail.style.display = 'none';
                 return;
             }
             selectedQuestionId = questionId;
             rowEl.classList.add('expanded');
+            var detailRow = createDetailRowAfter(rowEl);
+            if (!detailRow) return;
+            detailRow.firstChild.appendChild(detail);
             detail.classList.add('visible');
             detail.style.display = 'block';
-            placeholder.appendChild(detail);
             var stepSelect = document.getElementById('expandStepSelect');
             stepSelect.innerHTML = '<option value="">— Select step —</option>';
             (steps || []).forEach(function(s) {
