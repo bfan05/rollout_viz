@@ -534,12 +534,14 @@
         .table-wrapper > table {
             border-radius: var(--radius);
         }
+
         .data-table {
             width: 100%;
             table-layout: fixed;
             border-collapse: collapse;
             font-size: 0.875rem;
         }
+
         .data-table th {
             text-align: left;
             padding: 14px 18px;
@@ -551,44 +553,173 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
             border-bottom: 1px solid var(--border);
+            vertical-align: top;
         }
+
         .data-table td {
             padding: 14px 18px;
             border-bottom: 1px solid var(--border);
-            vertical-align: middle;
+            vertical-align: top;
         }
+
         .data-table tbody tr {
             cursor: pointer;
             transition: background 0.15s, box-shadow 0.15s;
         }
+
         .data-table tbody tr:hover {
             background: var(--bg-elevated);
         }
+
         .data-table tbody tr.expanded {
             background: var(--accent-light);
             box-shadow: inset 0 0 0 2px var(--accent);
         }
+
         .data-table tbody tr.expanded td {
             border-bottom-color: rgba(79, 70, 229, 0.2);
         }
-        .data-table .expand-cell { width: 3%; min-width: 36px; text-align: center; vertical-align: middle; color: var(--text-subtle); }
-        .data-table th.col-id,
-        .data-table td.col-id { width: 10%; }
-        .data-table td.col-id { font-family: ui-monospace, monospace; font-size: 0.8125rem; color: var(--accent); font-weight: 600; }
-        .data-table th.col-question,
-        .data-table td.col-question { width: 42%; min-width: 220px; line-height: 1.55; color: var(--text); box-sizing: border-box; word-break: break-word; overflow-wrap: break-word; }
-        .data-table td.col-question { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; padding: 14px 18px; }
-        .data-table th.col-num,
-        .data-table td.col-num { width: 10%; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-muted); }
-        .data-table th.col-diff,
-        .data-table td.col-diff { width: 10%; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-        .data-table .col-diff.positive { color: var(--success); }
-        .data-table .col-diff.negative { color: var(--error); }
-        .data-table .expand-icon { display: inline-block; transition: transform 0.2s; font-size: 0.7em; }
-        .data-table tbody tr.expanded .expand-icon { transform: rotate(90deg); color: var(--accent); }
 
-        .data-table tr.detail-row { background: transparent; cursor: default; }
-        .data-table tr.detail-row:hover { background: transparent; }
+        .data-table .expand-cell {
+            width: 3%;
+            min-width: 36px;
+            text-align: center;
+            vertical-align: middle;
+            color: var(--text-subtle);
+        }
+
+        .data-table th.col-id,
+        .data-table td.col-id {
+            width: 10%;
+        }
+
+        .data-table td.col-id {
+            font-family: ui-monospace, monospace;
+            font-size: 0.8125rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .data-table th.col-question,
+        .data-table td.col-question {
+            width: 48%;
+            min-width: 320px;
+            line-height: 1.6;
+            color: var(--text);
+            box-sizing: border-box;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .data-table td.col-question {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text);
+            background: rgba(248, 250, 252, 0.6);
+            border-left: 3px solid var(--border);
+            vertical-align: top;
+            white-space: normal;
+        }
+
+        /* Make collapsed rows show more of the question instead of cutting off too early */
+        .data-table tbody tr:not(.expanded) td.col-question .question-text {
+            display: block;
+            max-height: 12.8em; /* about 8 lines at line-height 1.6 */
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* subtle fade instead of abrupt cutoff */
+        .data-table tbody tr:not(.expanded) td.col-question .question-text::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3.2em;
+            background: linear-gradient(
+                to bottom,
+                rgba(248, 250, 252, 0),
+                rgba(248, 250, 252, 0.95) 70%,
+                rgba(248, 250, 252, 1)
+            );
+            pointer-events: none;
+        }
+
+        .data-table tbody tr:hover td.col-question .question-text::after,
+        .data-table tbody tr.expanded td.col-question .question-text::after {
+            background: linear-gradient(
+                to bottom,
+                rgba(238, 242, 255, 0),
+                rgba(238, 242, 255, 0.95) 70%,
+                rgba(238, 242, 255, 1)
+            );
+        }
+
+        /* Expanded rows show the full question */
+        .data-table tbody tr.expanded td.col-question .question-text {
+            display: block;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .data-table tbody tr.expanded td.col-question .question-text::after {
+            display: none;
+        }
+
+        .data-table tbody tr:hover td.col-question,
+        .data-table tbody tr.expanded td.col-question {
+            background: rgba(238, 242, 255, 0.5);
+            border-left-color: var(--accent);
+        }
+
+        .data-table th.col-num,
+        .data-table td.col-num {
+            width: 10%;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .data-table th.col-diff,
+        .data-table td.col-diff {
+            width: 10%;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .data-table .col-diff.positive {
+            color: var(--success);
+        }
+
+        .data-table .col-diff.negative {
+            color: var(--error);
+        }
+
+        .data-table .expand-icon {
+            display: inline-block;
+            transition: transform 0.2s;
+            font-size: 0.7em;
+        }
+
+        .data-table tbody tr.expanded .expand-icon {
+            transform: rotate(90deg);
+            color: var(--accent);
+        }
+
+        .data-table tr.detail-row {
+            background: transparent;
+            cursor: default;
+        }
+
+        .data-table tr.detail-row:hover {
+            background: transparent;
+        }
+
         .data-table tr.detail-row td {
             padding: 16px 18px 20px;
             border-bottom: 1px solid var(--border);
@@ -1008,32 +1139,42 @@
         function renderTableBody(rows) {
             selectedQuestionId = null;
             parkDetail();
+
             var tbody = document.getElementById('questionsTableBody');
             var query = (document.getElementById('tableSearch') || {}).value || '';
             var q = query.toLowerCase().trim();
+
             if (q) {
                 rows = rows.filter(function(r) {
                     return (r.question_id || '').toLowerCase().includes(q) ||
-                           (r.user_question || '').toLowerCase().includes(q);
+                        (r.user_question || '').toLowerCase().includes(q);
                 });
             }
+
             if (!rows.length) {
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No questions match</td></tr>';
                 return;
             }
+
             tbody.innerHTML = rows.map(function(r) {
                 var diff = r.difference;
-                var diffClass = diff != null ? (diff > 0 ? 'positive' : diff < 0 ? 'negative' : '') : '';
-                var preview = (r.user_question || '').slice(0, 320);
-                if ((r.user_question || '').length > 320) preview += '…';
+                var diffClass = diff != null
+                    ? (diff > 0 ? 'positive' : diff < 0 ? 'negative' : '')
+                    : '';
+
+                var qText = (r.user_question || '').replace(/\s+/g, ' ').trim();
+
                 return '<tr data-question-id="' + escapeHtml(r.question_id) + '" data-steps="' + escapeHtml(JSON.stringify(r.steps || [])) + '">' +
                     '<td class="expand-cell"><span class="expand-icon">▶</span></td>' +
                     '<td class="col-id">' + escapeHtml(r.question_id) + '</td>' +
-                    '<td class="col-question" title="' + escapeHtml(r.user_question || '') + '">' + escapeHtml(preview) + '</td>' +
+                    '<td class="col-question" title="' + escapeHtml(r.user_question || '') + '">' +
+                        '<div class="question-text">' + escapeHtml(qText) + '</div>' +
+                    '</td>' +
                     '<td class="col-num">' + formatPct(r.overall_accuracy) + '</td>' +
                     '<td class="col-num">' + formatPct(r.initial_difficulty) + '</td>' +
                     '<td class="col-num">' + formatPct(r.latest_difficulty) + '</td>' +
-                    '<td class="col-diff ' + diffClass + '">' + formatDiff(diff) + '</td></tr>';
+                    '<td class="col-diff ' + diffClass + '">' + formatDiff(diff) + '</td>' +
+                '</tr>';
             }).join('');
         }
         
