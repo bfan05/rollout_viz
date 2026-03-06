@@ -1,6 +1,13 @@
 # rollout-viz
 
-A small Python package that visualizes **rollout accuracy over time** during training. It can integrate with [Weights & Biases (wandb)](https://wandb.ai) to log accuracy to your run, or run a **standalone local website** that updates live as rollouts are generated.
+A small Python package that visualizes **rollout accuracy over time** during GRPO/PPO-style training. It can integrate with [Weights & Biases (wandb)](https://wandb.ai) to log accuracy to your run, or run a **standalone local web UI** that updates live as rollouts are generated.
+
+## Features
+
+- **Accuracy over steps** — Track per-step and per-question accuracy as training progresses.
+- **Standalone dashboard** — Table of questions with overall/initial/latest accuracy, difference, search, and expandable details (accuracy plot, step selector, rollout generations, length distribution).
+- **Wandb integration** — Log `rollout/accuracy` and optional embedded HTML panels.
+- **Flexible data sources** — Log from your training loop in-process, or point the CLI at a directory of JSONL files.
 
 ## Install
 
@@ -10,17 +17,17 @@ From the project root:
 pip install -e .
 ```
 
-Or install from a built wheel / from PyPI once published:
+With dev dependencies (tests):
 
 ```bash
-pip install rollout-viz
+pip install -e ".[dev]"
 ```
 
 ## Usage
 
-### 1. With wandb (default)
+### 1. With wandb
 
-Use this when you're already using wandb for your training run. Rollout accuracy is logged as `rollout/accuracy` and appears in your wandb dashboard over training steps.
+Use when you're already using wandb for your run. Rollout accuracy is logged as `rollout/accuracy` (and optionally as an interactive HTML panel).
 
 ```python
 import rollout_viz
@@ -31,37 +38,34 @@ rollout_viz.init(use_wandb=True)
 # Option B: Let rollout_viz start a wandb run
 rollout_viz.init(use_wandb=True, project="my-project", name="run-1")
 
-# Log each rollout as you generate it (e.g. in your GRPO/training loop)
+# Log each rollout in your training loop
 for step in range(1, num_steps + 1):
     for rollout in rollouts_at_step:
         rollout_viz.log_rollout({
             "step": step,
-            "input": rollout["prompt"],           # or "input"
-            "output": rollout["completion"],      # or "output"
-            "gts": rollout["ground_truth"],       # or "ground_truth"
-            "score": 1.0 if rollout["correct"] else 0.0,  # or "correct", "reward"
+            "input": rollout["prompt"],
+            "output": rollout["completion"],
+            "gts": rollout["ground_truth"],
+            "score": 1.0 if rollout["correct"] else 0.0,
         })
 
-# At the end, flush so the full accuracy series is logged
+# At the end, flush full series and final HTML to wandb
 rollout_viz.flush_wandb()
 ```
 
-**Supported field names:** `input`/`prompt`, `output`/`completion`, `gts`/`ground_truth`, `score`/`correct` (bool)/`reward`. Each entry must include `step` (training step number).
-
-The UI **updates as rollouts are generated**: each `log_rollout()` call updates in-memory state and, when using wandb, logs the current step’s accuracy to wandb.
+**Supported field names:** `input`/`prompt`, `output`/`completion`, `gts`/`ground_truth`, `score`/`correct` (bool)/`reward`. Each entry must include `step`.
 
 ---
 
 ### 2. Standalone website (no wandb)
 
-Use this when you don’t want wandb. A local web server serves a dashboard that shows accuracy over time and per-question details; it **updates live** as you call `log_rollout()` or as new JSONL files appear in `data_dir`.
+A local Flask server serves a dashboard that updates live as you call `log_rollout()` or as new JSONL files appear in `data_dir`.
 
-**Option A: In-process server (updates as you log)**
+**Option A: In-process server**
 
 ```python
 import rollout_viz
 
-# Start the website in a background thread; it will show data from memory + data_dir
 rollout_viz.init(
     use_wandb=False,
     data_dir="./rollouts",
@@ -70,30 +74,27 @@ rollout_viz.init(
 )
 # Open http://localhost:5000
 
-# Log rollouts as usual; the page updates as you log
 rollout_viz.log_rollout({"step": 1, "input": "...", "output": "...", "gts": "4", "score": 1.0})
 ```
 
-**Option B: CLI server (watch a directory of JSONL files)**
+**Option B: CLI (watch a directory)**
 
-If your training process writes rollout files (e.g. `1.jsonl`, `2.jsonl`, …) to a directory, run the standalone server in a separate terminal. The site will pick up new/changed files and refresh.
+If your trainer writes rollout files (e.g. `1.jsonl`, `2.jsonl`, …) to a directory:
 
 ```bash
 rollout-viz --data-dir ./rollouts --port 5000
 # Open http://localhost:5000
 ```
 
-Files should be named by step: `1.jsonl`, `2.jsonl`, … with one JSON object per line (same fields as above: `step`, `input`/`prompt`, `output`/`completion`, `gts`/`ground_truth`, `score`/`correct`/`reward`).
+Files can be step-named (`1.jsonl`, `2.jsonl`, …) or a single `rollouts.jsonl` with a `step` field on each line.
 
 ---
 
 ### 3. Both wandb and standalone
 
-You can log to wandb and run the local website at the same time (e.g. for local debugging while also sending metrics to wandb).
+You can run the local UI and log to wandb at the same time:
 
 ```python
-import rollout_viz
-
 rollout_viz.init(
     use_wandb=True,
     project="my-project",
@@ -101,7 +102,6 @@ rollout_viz.init(
     run_standalone=True,
     standalone_port=5000,
 )
-# Log rollouts as usual; both wandb and http://localhost:5000 update
 rollout_viz.log_rollout(...)
 ```
 
@@ -109,27 +109,25 @@ rollout_viz.log_rollout(...)
 
 ## Data format
 
-Each rollout entry can use any of these field names:
-
 | Purpose        | Accepted keys                          |
 |----------------|----------------------------------------|
 | Prompt / input | `input`, `prompt`                      |
 | Model output   | `output`, `completion`                 |
-| Ground truth   | `gts`, `ground_truth`                  |
-| Correct / score| `score` (0/1), `correct` (bool), `reward` |
+| Ground truth   | `gts`, `ground_truth`                 |
+| Correct/score  | `score` (0/1), `correct` (bool), `reward` |
 | Step           | `step` (required)                      |
 
 `question_id` is optional; if missing, it is derived from the input (e.g. hash).
 
 ---
 
-## API summary
+## API
 
 | Function | Description |
 |----------|-------------|
-| `rollout_viz.init(use_wandb=..., project=..., data_dir=..., run_standalone=..., standalone_port=...)` | Initialize; optionally start wandb and/or the standalone server. |
-| `rollout_viz.log_rollout(entry)` | Log one rollout; updates wandb (if enabled) and in-memory / `data_dir`. |
-| `rollout_viz.flush_wandb()` | Log the full accuracy-over-step series to wandb (call at end of run). |
+| `rollout_viz.init(use_wandb=..., project=..., data_dir=..., run_standalone=..., standalone_port=..., write_to_dir=...)` | Initialize; optionally start wandb and/or the standalone server. |
+| `rollout_viz.log_rollout(entry)` | Log one rollout; updates wandb (if enabled), in-memory state, and optionally appends to `data_dir`. |
+| `rollout_viz.flush_wandb()` | Log the full accuracy series and final HTML to wandb (call at end of run). |
 | `rollout_viz.set_data_dir(path)` | Set or change the rollout data directory. |
 | `rollout_viz.get_data_dir()` | Return the current data directory, if any. |
 | `rollout_viz.is_standalone_running()` | Return whether the in-process standalone server is running. |
@@ -138,9 +136,24 @@ Each rollout entry can use any of these field names:
 
 ## CLI
 
-- **`rollout-viz --data-dir <dir> [--port <port>] [--host <host>]`**  
-  Run the standalone visualization server reading JSONL files from `<dir>`. Default port: 5000; default host: 0.0.0.0.  
-  Environment: `ROLLOUT_VIZ_DATA_DIR` can set the default data directory.
+```bash
+rollout-viz [--data-dir <dir>] [--port <port>] [--host <host>]
+```
+
+- **`--data-dir`** — Directory containing rollout JSONL files (default: `.` or `ROLLOUT_VIZ_DATA_DIR`).
+- **`--port`** — Port for the web server (default: 5000).
+- **`--host`** — Host to bind (default: 0.0.0.0).
+
+---
+
+## Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `ROLLOUT_VIZ_DATA_DIR` | Default data directory for the CLI. |
+| `ROLLOUT_VIZ_STANDALONE` | Set to `0` to disable starting the standalone server when using the Python API. |
+| `ROLLOUT_VIZ_PORT` | Default port for the standalone server (Python API). |
+| `ROLLOUT_VIZ_HTML_EVERY_N_STEPS` | When using wandb, log the interactive HTML panel every N steps (default: 5). |
 
 ---
 

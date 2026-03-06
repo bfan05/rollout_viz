@@ -683,6 +683,38 @@
             white-space: nowrap;
         }
 
+        .data-table th.col-difficulty,
+        .data-table td.col-difficulty {
+            width: 9%;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .data-table .difficulty-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .data-table .difficulty-badge.difficulty-easy {
+            background: var(--success-bg);
+            color: #047857;
+        }
+
+        .data-table .difficulty-badge.difficulty-medium {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .data-table .difficulty-badge.difficulty-hard {
+            background: var(--error-bg);
+            color: #b91c1c;
+        }
+
         .data-table th.col-diff,
         .data-table td.col-diff {
             width: 10%;
@@ -920,13 +952,14 @@
                             <th class="col-id">Question ID</th>
                             <th class="col-question">Raw question text</th>
                             <th class="col-num">Overall accuracy</th>
+                            <th class="col-difficulty">Difficulty</th>
                             <th class="col-num">Initial accuracy</th>
                             <th class="col-num">Latest accuracy</th>
                             <th class="col-diff">Difference</th>
                         </tr>
                     </thead>
                     <tbody id="questionsTableBody">
-                        <tr><td colspan="7" class="loading">Loading table...</td></tr>
+                        <tr><td colspan="8" class="loading">Loading table...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1040,10 +1073,17 @@
             var s = (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%';
             return s;
         }
+
+        function getDifficulty(overallAccuracy) {
+            if (overallAccuracy == null) return 'medium';
+            if (overallAccuracy >= 0.7) return 'easy';
+            if (overallAccuracy >= 0.3) return 'medium';
+            return 'hard';
+        }
         
         function loadTable() {
             var tbody = document.getElementById('questionsTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" class="loading">Loading table...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading table...</td></tr>';
             if (window.ROLLOUT_VIZ_EMBEDDED_DATA && window.ROLLOUT_VIZ_EMBEDDED_DATA.tableRows) {
                 allTableRows = window.ROLLOUT_VIZ_EMBEDDED_DATA.tableRows;
                 renderTableBody(allTableRows);
@@ -1056,13 +1096,13 @@
                     renderTableBody(allTableRows);
                 })
                 .catch(err => {
-                    tbody.innerHTML = '<tr><td colspan="7" class="error">Error loading table: ' + escapeHtml(err.message) + '</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="error">Error loading table: ' + escapeHtml(err.message) + '</td></tr>';
                 });
         }
         
         function buildTableFromQuestions() {
             if (!allQuestions || !allQuestions.length) {
-                document.getElementById('questionsTableBody').innerHTML = '<tr><td colspan="7" class="empty-state">No questions found</td></tr>';
+                document.getElementById('questionsTableBody').innerHTML = '<tr><td colspan="8" class="empty-state">No questions found</td></tr>';
                 return;
             }
             var rows = allQuestions.map(function(q) {
@@ -1130,7 +1170,7 @@
             var detailRow = document.createElement('tr');
             detailRow.className = 'detail-row';
             var detailCell = document.createElement('td');
-            detailCell.colSpan = 7;
+            detailCell.colSpan = 8;
             detailRow.appendChild(detailCell);
             rowEl.parentElement.insertBefore(detailRow, rowEl.nextSibling);
             return detailRow;
@@ -1152,7 +1192,7 @@
             }
 
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No questions match</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No questions match</td></tr>';
                 return;
             }
 
@@ -1171,6 +1211,7 @@
                         '<div class="question-text">' + escapeHtml(qText) + '</div>' +
                     '</td>' +
                     '<td class="col-num">' + formatPct(r.overall_accuracy) + '</td>' +
+                    '<td class="col-difficulty"><span class="difficulty-badge difficulty-' + getDifficulty(r.overall_accuracy) + '">' + getDifficulty(r.overall_accuracy) + '</span></td>' +
                     '<td class="col-num">' + formatPct(r.initial_difficulty) + '</td>' +
                     '<td class="col-num">' + formatPct(r.latest_difficulty) + '</td>' +
                     '<td class="col-diff ' + diffClass + '">' + formatDiff(diff) + '</td>' +
