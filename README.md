@@ -154,6 +154,7 @@ rollout-viz [--data-dir <dir>] [--port <port>] [--host <host>]
 | `ROLLOUT_VIZ_STANDALONE` | Set to `0` to disable starting the standalone server when using the Python API. |
 | `ROLLOUT_VIZ_PORT` | Default port for the standalone server (Python API). |
 | `ROLLOUT_VIZ_HTML_EVERY_N_STEPS` | When using wandb, log the interactive HTML panel every N steps (default: 5). |
+| `ROLLOUT_VIZ_WANDB_HTML` | Set to `0` to disable logging the interactive HTML panel to wandb (accuracy scalars can still log). |
 
 ---
 

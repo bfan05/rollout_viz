@@ -276,3 +276,33 @@ def get_rollout_length_distribution(
         result["lengths_tokens"] = lengths_tokens
         result["mean_tokens"] = round(sum(lengths_tokens) / len(lengths_tokens), 2)
     return result
+
+
+def get_rollout_length_distribution_all_steps(
+    data: List[Dict[str, Any]], question_id: str
+) -> Dict[str, Any]:
+    """
+    Return rollout length stats aggregated over all steps for a question_id.
+    Uses character length; if token counts are present, include aggregate stats too.
+    """
+    question_data = [e for e in data if e.get("question_id") == question_id]
+    lengths_chars: List[int] = []
+    lengths_tokens: List[int] = []
+    for e in question_data:
+        output_text = e.get("output", "")
+        lengths_chars.append(len(output_text))
+        token_len = e.get("response_length") or e.get("output_length")
+        if token_len is not None:
+            lengths_tokens.append(token_len)
+
+    result: Dict[str, Any] = {
+        "lengths": lengths_chars,
+        "count": len(lengths_chars),
+        "min": min(lengths_chars) if lengths_chars else None,
+        "max": max(lengths_chars) if lengths_chars else None,
+        "mean": round(sum(lengths_chars) / len(lengths_chars), 2) if lengths_chars else None,
+    }
+    if lengths_tokens:
+        result["lengths_tokens"] = lengths_tokens
+        result["mean_tokens"] = round(sum(lengths_tokens) / len(lengths_tokens), 2)
+    return result

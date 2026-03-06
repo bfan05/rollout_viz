@@ -24,6 +24,7 @@ from ._server import _generate_plot, _classify_difficulty
 _wandb_run = None
 _last_html_step: Optional[int] = None
 _HTML_LOG_EVERY_N_STEPS = int(os.environ.get("ROLLOUT_VIZ_HTML_EVERY_N_STEPS", "5"))
+_WANDB_HTML_ENABLED = os.environ.get("ROLLOUT_VIZ_WANDB_HTML", "1") != "0"
 
 
 def set_wandb_run(run):
@@ -58,9 +59,8 @@ def log_rollout_accuracy(data: List[Dict[str, Any]], step: int) -> None:
         }
     )
     # Periodically log an updated interactive HTML visualization during training.
-    if (
-        _last_html_step is None
-        or step >= _last_html_step + _HTML_LOG_EVERY_N_STEPS
+    if _WANDB_HTML_ENABLED and (
+        _last_html_step is None or step >= _last_html_step + _HTML_LOG_EVERY_N_STEPS
     ):
         log_interactive_visualization(data)
         _last_html_step = step
@@ -90,6 +90,8 @@ def log_interactive_visualization(data: List[Dict[str, Any]]) -> None:
     """
     run = get_wandb_run()
     if run is None:
+        return
+    if not _WANDB_HTML_ENABLED:
         return
 
     normalized: List[Dict[str, Any]] = []

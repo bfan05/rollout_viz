@@ -57,11 +57,18 @@ def _generate_plot(
         y_max = max(accuracies) if accuracies else 1.0
         y_padding = max(0.15, y_max * 0.2)
         ax.set_ylim([0, min(1.05, y_max + y_padding)])
-        # X-axis: integer bounds and only integer ticks (no decimals)
+        # X-axis: choose a reasonable number of integer ticks (no decimals)
         step_min, step_max = min(steps), max(steps)
         ax.set_xlim([step_min - 0.5, step_max + 0.5])
         from matplotlib.ticker import FixedLocator
-        ax.xaxis.set_major_locator(FixedLocator(steps))
+        # Target up to ~8 tick labels; always use integer step numbers.
+        target_ticks = 8
+        span = max(1, step_max - step_min)
+        stride = max(1, int(round(span / max(1, target_ticks - 1))))
+        ticks = list(range(step_min, step_max + 1, stride))
+        if ticks[-1] != step_max:
+            ticks.append(step_max)
+        ax.xaxis.set_major_locator(FixedLocator(ticks))
         ax.tick_params(axis="x", labelsize=10, colors="#666")
         ax.set_yticklabels([f"{y:.0%}" for y in ax.get_yticks()], fontsize=10, color="#666")
 
@@ -142,6 +149,16 @@ def create_app(get_data_callback: Callable[[], List[Dict[str, Any]]]) -> Flask:
     def api_rollout_length_distribution(question_id, step):
         try:
             dist = _data.get_rollout_length_distribution(data(), question_id, step)
+            return jsonify(dist)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/rollout_length_distribution_all/<question_id>")
+    def api_rollout_length_distribution_all(question_id):
+        try:
+            dist = _data.get_rollout_length_distribution_all_steps(data(), question_id)
             return jsonify(dist)
         except Exception as e:
             import traceback
