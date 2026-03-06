@@ -14,7 +14,10 @@ from ._data import (
     get_question_info,
     get_unique_steps,
     get_responses_at_step,
+    get_table_rows,
+    get_rollout_length_distribution,
 )
+# table_rows and length distributions are included in the embedded payload for standalone HTML (e.g. wandb)
 from ._server import _generate_plot, _classify_difficulty
 
 
@@ -158,6 +161,7 @@ def log_interactive_visualization(data: List[Dict[str, Any]]) -> None:
 
     # Responses per (question_id, step) - keys must be strings for JSON
     responses: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+    length_distributions: Dict[str, Dict[str, Dict[str, Any]]] = {}
     for qid in question_ids:
         info = question_info.get(qid, {})
         for step in info.get("steps", []):
@@ -165,6 +169,12 @@ def log_interactive_visualization(data: List[Dict[str, Any]]) -> None:
             if qid not in responses:
                 responses[qid] = {}
             responses[qid][str(step)] = resp_list
+            dist = get_rollout_length_distribution(normalized, qid, step)
+            if qid not in length_distributions:
+                length_distributions[qid] = {}
+            length_distributions[qid][str(step)] = dist
+
+    table_rows = get_table_rows(normalized)
 
     payload = {
         "status": status,
@@ -172,6 +182,8 @@ def log_interactive_visualization(data: List[Dict[str, Any]]) -> None:
         "questionInfo": question_info,
         "plotImages": plot_images,
         "responses": responses,
+        "tableRows": table_rows,
+        "lengthDistributions": length_distributions,
     }
     data_json = json.dumps(payload, ensure_ascii=False)
     data_json = data_json.replace("</script>", "<\\/script>")

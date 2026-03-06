@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRPO Training Visualization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script>
         window.MathJax = {
@@ -14,7 +17,6 @@
             startup: {
                 ready: () => {
                     MathJax.startup.defaultReady();
-                    console.log('MathJax is ready');
                 }
             }
         };
@@ -63,153 +65,191 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
+        :root {
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-elevated: #f8fafc;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-light: #eef2ff;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --error: #dc2626;
+            --error-bg: #fef2f2;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f5;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-page);
             min-height: 100vh;
-            padding: 20px;
-            color: #1f2937;
+            padding: 24px;
+            color: var(--text);
+            line-height: 1.5;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 32px;
+            border: 1px solid var(--border);
         }
-        
+
         h1 {
-            color: #111827;
-            margin-bottom: 10px;
-            font-size: 2em;
-            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
-        
+
         .subtitle {
-            color: #6b7280;
-            margin-bottom: 30px;
-            font-size: 0.95em;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-size: 0.95em;
-            font-weight: 500;
-            color: #6b7280;
-            transition: all 0.2s;
-        }
-        
-        .tab:hover {
-            color: #2563eb;
-        }
-        
-        .tab.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-size: 0.9375rem;
         }
         
         .overall-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
+            padding: 20px 24px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
         }
-        
-        .stat-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
+
+        .overall-stats .stat-card {
+            margin: 0;
         }
-        
-        .stat-value {
-            font-size: 2em;
+
+        .btn-refresh {
+            margin-left: auto;
+            padding: 10px 18px;
+            font-size: 0.875rem;
             font-weight: 600;
-            color: #111827;
-            margin-bottom: 5px;
+            font-family: inherit;
+            color: var(--accent);
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
-        
+
+        .btn-refresh:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-hover);
+            color: var(--accent-hover);
+        }
+
+        .btn-refresh:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px 22px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
         .stat-label {
-            font-size: 0.9em;
-            color: #6b7280;
+            font-size: 0.75rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.06em;
+            font-weight: 600;
         }
         
         .plot-container {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
             min-height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 28px;
         }
-        
+        .plot-container-small {
+            min-height: 200px;
+            margin-bottom: 12px;
+            padding: 16px 20px;
+        }
+
         .plot-container img {
             max-width: 100%;
             height: auto;
         }
-        
+
         .loading {
-            color: #6b7280;
-            font-size: 0.95em;
+            color: var(--text-muted);
+            font-size: 0.9375rem;
         }
-        
+
         .error {
-            color: #dc2626;
-            font-size: 0.95em;
+            color: var(--error);
+            font-size: 0.9375rem;
             padding: 20px;
         }
-        
+
         .search-section {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
-        
+
         .search-box {
             width: 100%;
             padding: 12px 16px;
-            font-size: 0.95em;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
+
+        .search-box::placeholder {
+            color: var(--text-subtle);
+        }
+
         .search-box:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
         }
         
         .questions-grid {
@@ -222,68 +262,68 @@
         }
         
         .question-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 15px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
-        
+
         .question-card:hover {
-            border-color: #2563eb;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
         }
-        
+
         .question-card.selected {
-            border-color: #2563eb;
-            background: #eff6ff;
+            border-color: var(--accent);
+            background: var(--accent-light);
         }
-        
+
         .question-id {
             font-weight: 600;
-            color: #2563eb;
+            color: var(--accent);
             margin-bottom: 8px;
-            font-size: 0.9em;
+            font-size: 0.875rem;
         }
-        
+
         .question-preview {
-            font-size: 0.85em;
-            color: #6b7280;
+            font-size: 0.875rem;
+            color: var(--text-muted);
             line-height: 1.5;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         .question-label-section {
-            font-size: 0.75em;
+            font-size: 0.6875rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6b7280;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
             font-weight: 600;
             margin-bottom: 5px;
         }
-        
+
         .sample-response-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
         }
-        
+
         .sample-response-label {
-            font-size: 0.75em;
+            font-size: 0.6875rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6b7280;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
             font-weight: 600;
             margin-bottom: 5px;
         }
-        
+
         .sample-response-text {
-            font-size: 0.85em;
-            color: #6b7280;
+            font-size: 0.875rem;
+            color: var(--text-muted);
             font-style: italic;
             line-height: 1.5;
             display: -webkit-box;
@@ -291,22 +331,22 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         .asymptote-code {
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-family: ui-monospace, 'SF Mono', monospace;
+            font-size: 0.8125rem;
             overflow-x: auto;
             margin: 10px 0;
         }
-        
+
         .question-info-box {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
             padding: 20px;
             margin-bottom: 20px;
         }
@@ -320,93 +360,95 @@
         }
         
         .question-info-label {
-            font-size: 0.85em;
+            font-size: 0.8125rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6b7280;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
             font-weight: 600;
             margin-bottom: 8px;
         }
-        
+
         .question-info-value {
-            color: #111827;
+            color: var(--text);
             font-weight: 400;
-            font-size: 1em;
+            font-size: 1rem;
             line-height: 1.6;
         }
-        
+
         .question-info-value.question-text {
-            color: #374151;
+            color: var(--text);
         }
-        
+
         .question-info-value.answer-text {
-            color: #059669;
-            font-weight: 500;
+            color: var(--success);
+            font-weight: 600;
         }
-        
+
         .question-detail {
-            margin-bottom: 30px;
+            margin-bottom: 28px;
             padding: 20px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
         }
-        
+
         .question-detail h3 {
-            color: #111827;
-            margin-bottom: 15px;
-            font-size: 1.2em;
+            color: var(--text);
+            margin-bottom: 14px;
+            font-size: 1.125rem;
         }
-        
+
         .question-text {
-            color: #374151;
+            color: var(--text);
             line-height: 1.6;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             white-space: pre-wrap;
         }
-        
+
         .ground-truth {
-            padding: 10px;
-            background: #d1fae5;
-            border-left: 3px solid #059669;
-            border-radius: 4px;
-            margin-top: 15px;
+            padding: 12px 14px;
+            background: var(--success-bg);
+            border-left: 3px solid var(--success);
+            border-radius: 6px;
+            margin-top: 14px;
         }
-        
+
         .ground-truth-label {
-            font-size: 0.85em;
+            font-size: 0.8125rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #065f46;
+            letter-spacing: 0.06em;
+            color: #047857;
             font-weight: 600;
             margin-bottom: 5px;
         }
-        
+
         .ground-truth-value {
-            color: #065f46;
-            font-weight: 500;
+            color: #047857;
+            font-weight: 600;
         }
-        
+
         .step-selector {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
-        
+
         .step-selector label {
             display: block;
-            font-weight: 500;
-            color: #374151;
+            font-weight: 600;
+            color: var(--text);
             margin-bottom: 8px;
-            font-size: 0.95em;
+            font-size: 0.9375rem;
         }
-        
+
         .step-selector select {
             width: 100%;
             padding: 10px 14px;
-            font-size: 0.95em;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
             cursor: pointer;
+            color: var(--text);
         }
         
         .responses-container {
@@ -415,66 +457,299 @@
         }
         
         .response-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 15px;
-            border-left: 4px solid #d1d5db;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            border-left: 4px solid var(--border-strong);
         }
-        
+
         .response-card.correct {
-            border-left-color: #059669;
-            background: #f0fdf4;
+            border-left-color: var(--success);
+            background: var(--success-bg);
         }
-        
+
         .response-card.incorrect {
-            border-left-color: #dc2626;
-            background: #fef2f2;
+            border-left-color: var(--error);
+            background: var(--error-bg);
         }
-        
+
         .response-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
+
         .response-status {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
-        
+
         .response-status.correct {
-            background: #d1fae5;
-            color: #065f46;
+            background: #a7f3d0;
+            color: #047857;
         }
-        
+
         .response-status.incorrect {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #fecaca;
+            color: #b91c1c;
         }
-        
+
         .response-text {
-            color: #374151;
+            color: var(--text);
             line-height: 1.6;
             white-space: pre-wrap;
             max-height: 300px;
             overflow-y: auto;
-            font-size: 0.9em;
+            font-size: 0.875rem;
         }
-        
+
         .empty-state {
             text-align: center;
-            padding: 40px;
-            color: #6b7280;
+            padding: 40px 24px;
+            color: var(--text-muted);
+            font-size: 0.9375rem;
         }
-        
+
         .empty-state-icon {
-            font-size: 3em;
+            font-size: 2.5rem;
             margin-bottom: 10px;
+        }
+
+        /* Table view */
+        .table-section {
+            margin-bottom: 0;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .table-wrapper > table {
+            border-radius: var(--radius);
+        }
+        .data-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 14px 18px;
+            background: var(--bg-elevated);
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--text-muted);
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .data-table tbody tr {
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+        .data-table tbody tr:hover {
+            background: var(--bg-elevated);
+        }
+        .data-table tbody tr.expanded {
+            background: var(--accent-light);
+            box-shadow: inset 0 0 0 2px var(--accent);
+        }
+        .data-table tbody tr.expanded td {
+            border-bottom-color: rgba(79, 70, 229, 0.2);
+        }
+        .data-table .expand-cell { width: 3%; min-width: 36px; text-align: center; vertical-align: middle; color: var(--text-subtle); }
+        .data-table th.col-id,
+        .data-table td.col-id { width: 10%; }
+        .data-table td.col-id { font-family: ui-monospace, monospace; font-size: 0.8125rem; color: var(--accent); font-weight: 600; }
+        .data-table th.col-question,
+        .data-table td.col-question { width: 42%; min-width: 220px; line-height: 1.55; color: var(--text); box-sizing: border-box; word-break: break-word; overflow-wrap: break-word; }
+        .data-table td.col-question { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; padding: 14px 18px; }
+        .data-table th.col-num,
+        .data-table td.col-num { width: 10%; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+        .data-table th.col-diff,
+        .data-table td.col-diff { width: 10%; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+        .data-table .col-diff.positive { color: var(--success); }
+        .data-table .col-diff.negative { color: var(--error); }
+        .data-table .expand-icon { display: inline-block; transition: transform 0.2s; font-size: 0.7em; }
+        .data-table tbody tr.expanded .expand-icon { transform: rotate(90deg); color: var(--accent); }
+
+        .data-table tr.detail-row { background: transparent; cursor: default; }
+        .data-table tr.detail-row:hover { background: transparent; }
+        .data-table tr.detail-row td {
+            padding: 16px 18px 20px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+            overflow: visible;
+            position: relative;
+        }
+
+        .expandable-detail {
+            display: none;
+            width: 100%;
+            max-width: 100%;
+            padding: 20px 24px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-top: 16px;
+            margin-bottom: 0;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+        .expandable-detail.visible {
+            display: block !important;
+        }
+        .expandable-detail .detail-section {
+            margin-bottom: 20px;
+        }
+        .expandable-detail .detail-section:last-child {
+            margin-bottom: 0;
+        }
+        .expandable-detail .detail-section h4 {
+            font-size: 0.9em;
+            color: #374151;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .expandable-detail .detail-section-question-preview {
+            width: 100%;
+            max-width: 100%;
+        }
+        .expandable-detail .expand-raw-question-text {
+            width: 100%;
+            max-width: 100%;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            font-size: 0.9375rem;
+            box-sizing: border-box;
+        }
+        .expandable-detail .step-selector-inline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .expandable-detail .step-selector-inline label { font-weight: 600; color: var(--text); }
+        .expandable-detail .step-selector-inline select {
+            padding: 8px 12px;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            min-width: 140px;
+            color: var(--text);
+        }
+        .length-distribution {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-top: 8px;
+            width: 100%;
+            min-width: 0;
+            overflow: visible;
+        }
+        .length-distribution .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+        .length-distribution .stats-row span { font-variant-numeric: tabular-nums; }
+        .length-distribution .histogram-wrap {
+            display: flex;
+            flex-direction: column;
+            margin-top: 8px;
+            width: 100%;
+            min-width: 280px;
+            overflow: visible;
+        }
+        .length-distribution .histogram-y-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .length-distribution .histogram-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 120px;
+            min-height: 120px;
+            padding-left: 28px;
+            position: relative;
+            width: 100%;
+        }
+        .length-distribution .histogram-y-axis {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 24px;
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .length-distribution .histogram {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            flex: 1;
+            min-width: 120px;
+        }
+        .length-distribution .histogram-bar {
+            flex: 1;
+            min-width: 6px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+            opacity: 0.85;
+            cursor: default;
+        }
+        .length-distribution .histogram-bar:hover {
+            opacity: 1;
+        }
+        .length-distribution .histogram-x-axis {
+            padding-left: 28px;
+            margin-top: 4px;
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+            width: 100%;
+            min-width: 0;
+        }
+        .length-distribution .histogram-x-axis span {
+            flex-shrink: 0;
+        }
+        .length-distribution .histogram-x-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
         }
     </style>
 </head>
@@ -483,86 +758,73 @@
         <h1>GRPO Training Visualization</h1>
         <div class="subtitle">Track accuracy changes throughout the GRPO training loop</div>
         
-        <div class="tabs">
-            <button class="tab active" data-tab="overview">Overview</button>
-            <button class="tab" data-tab="questions">Questions</button>
-            <button class="tab" data-tab="responses">Step Responses</button>
+        <div class="overall-stats" id="overallStats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalQuestions">-</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalSteps">-</div>
+                <div class="stat-label">Training Steps</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRollouts">-</div>
+                <div class="stat-label">Total Rollouts</div>
+            </div>
+            <button type="button" class="btn-refresh" id="btnRefresh" title="Reload data">Refresh</button>
         </div>
         
-        <!-- Overview Tab -->
-        <div class="tab-content active" id="overview">
-            <div class="overall-stats" id="overallStats">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalQuestions">-</div>
-                    <div class="stat-label">Total Questions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalSteps">-</div>
-                    <div class="stat-label">Training Steps</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalRollouts">-</div>
-                    <div class="stat-label">Total Rollouts</div>
-                </div>
+        <div class="table-section">
+            <div class="search-section" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
+                <input type="text" class="search-box" id="tableSearch" placeholder="Search by question ID or text..." style="flex: 1; min-width: 220px;">
             </div>
             
-            <div style="text-align: center; padding: 40px; color: #6b7280;">
-                <p>Select a question from the Questions tab to view its accuracy over training steps.</p>
+            <div class="table-wrapper">
+                <table class="data-table" id="questionsTable">
+                    <thead>
+                        <tr>
+                            <th class="expand-cell"></th>
+                            <th class="col-id">Question ID</th>
+                            <th class="col-question">Raw question text</th>
+                            <th class="col-num">Overall accuracy</th>
+                            <th class="col-num">Initial accuracy</th>
+                            <th class="col-num">Latest accuracy</th>
+                            <th class="col-diff">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questionsTableBody">
+                        <tr><td colspan="7" class="loading">Loading table...</td></tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        
-        <!-- Questions Tab -->
-        <div class="tab-content" id="questions">
-            <div class="search-section" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                <input type="text" class="search-box" id="questionSearch" placeholder="Search questions by ID or content..." style="flex: 1; min-width: 200px;">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <label for="difficultyFilter" style="font-weight: 500; font-size: 0.9em; color: #374151;">Filter:</label>
-                    <select id="difficultyFilter" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9em; cursor: pointer;">
-                        <option value="all">All Difficulties</option>
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                    </select>
+            <div id="expandableDetailPlaceholder">
+                <div class="expandable-detail" id="expandableDetail">
+                <div class="detail-section detail-section-question-preview" id="expandRawQuestionSection">
+                    <h4>Question preview</h4>
+                    <div class="expand-raw-question-text" id="expandRawQuestionText"></div>
                 </div>
-            </div>
-            
-            <div class="questions-grid" id="questionsGrid">
-                <div class="loading">Loading questions...</div>
-            </div>
-            
-            <div class="question-detail" id="questionDetail" style="display: none;">
-                <h3 id="questionDetailTitle">Question Details</h3>
-                <div class="question-info-box" id="questionInfoBox"></div>
-            </div>
-            
-            <div class="plot-container" id="questionPlot" style="display: none;">
-                <div class="loading">Select a question to view accuracy plot</div>
-            </div>
-        </div>
-        
-        <!-- Step Responses Tab -->
-        <div class="tab-content" id="responses">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div>
-                    <label for="responseQuestionSelect" style="display: block; font-weight: 500; margin-bottom: 8px;">Select Question</label>
-                    <select id="responseQuestionSelect" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
-                        <option value="">-- Select a Question --</option>
-                    </select>
+                <div class="detail-section">
+                    <h4>Accuracy over training steps</h4>
+                    <div class="plot-container plot-container-small" id="questionPlot" style="min-height: 200px;">
+                        <div class="loading">Loading plot...</div>
+                    </div>
                 </div>
-                <div>
-                    <label for="responseStepSelect" style="display: block; font-weight: 500; margin-bottom: 8px;">Select Training Step</label>
-                    <select id="responseStepSelect" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
-                        <option value="">-- Select a Step --</option>
-                    </select>
+                <div class="detail-section">
+                    <h4>Pick a training step to see rollout generations and length distribution</h4>
+                    <div class="step-selector-inline">
+                        <label for="expandStepSelect">Training step:</label>
+                        <select id="expandStepSelect">
+                            <option value="">— Select step —</option>
+                        </select>
+                    </div>
+                    <div id="expandStepContent" style="display: none;">
+                        <div class="question-info-box" id="expandQuestionInfoBox" style="margin-bottom: 16px;"></div>
+                        <h4 style="margin-top: 16px;">Example rollout generations</h4>
+                        <div class="responses-container" id="expandResponsesContainer"></div>
+                        <h4 style="margin-top: 16px;">Rollout length distribution</h4>
+                        <div class="length-distribution" id="expandLengthDistribution"></div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="question-info-box" id="responseQuestionInfoBox" style="display: none;"></div>
-            
-            <div class="responses-container" id="responsesContainer">
-                <div class="empty-state">
-                    <div class="empty-state-icon">📝</div>
-                    <div>Select a question and training step to view responses</div>
                 </div>
             </div>
         </div>
@@ -576,85 +838,371 @@
         // State
         let allQuestions = [];
         let allSteps = [];
+        let allTableRows = [];
         let selectedQuestionId = null;
         
         function initFromEmbeddedData() {
             var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
             if (!d) return;
             allQuestions = d.questions || [];
+            allTableRows = d.tableRows || [];
             allSteps = d.status && d.status.steps || [];
             document.getElementById('totalQuestions').textContent = (d.status && d.status.question_count != null) ? d.status.question_count : '-';
             document.getElementById('totalSteps').textContent = allSteps.length;
             document.getElementById('totalRollouts').textContent = (d.status && d.status.total_entries != null) ? d.status.total_entries : '-';
-            renderQuestions(allQuestions);
-            setupTabs();
-            setupSearch();
+            if (allTableRows.length) renderTableBody(allTableRows); else buildTableFromQuestions();
         }
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
                 initFromEmbeddedData();
-                return;
-            }
-            loadStatus();
-            loadQuestions();
-            loadSteps();
-            setupTabs();
-            setupSearch();
-        });
-
-        // Periodically refresh data in standalone mode so the UI updates
-        // automatically as new rollouts are written during training.
-        (function setupAutoRefresh() {
-            // Do not auto-refresh when using the embedded HTML-in-WandB mode,
-            // since that uses static data injected at render time.
-            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
-                return;
-            }
-
-            const REFRESH_INTERVAL_MS = 5000; // 5 seconds
-
-            setInterval(() => {
-                // Refresh high-level stats and question list.
+            } else {
                 loadStatus();
-                loadQuestions();
-                loadSteps();
-                loadResponseQuestions();
-
-                // If a question is currently selected, refresh its plot.
-                if (selectedQuestionId) {
-                    loadQuestionPlot(selectedQuestionId);
-
-                    // If a question and step are selected in the Responses tab,
-                    // refresh the responses as well.
-                    const qSelect = document.getElementById('responseQuestionSelect');
-                    const stepSelect = document.getElementById('responseStepSelect');
-                    if (qSelect && stepSelect && qSelect.value && stepSelect.value) {
-                        loadResponses(qSelect.value, stepSelect.value);
+                loadTable();
+            }
+            setupTableSearch();
+            setupTableRowClicks();
+            var btn = document.getElementById('btnRefresh');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    if (window.ROLLOUT_VIZ_EMBEDDED_DATA) return;
+                    loadStatus();
+                    loadTable();
+                    if (selectedQuestionId) {
+                        loadQuestionPlot(selectedQuestionId);
+                        var stepSel = document.getElementById('expandStepSelect');
+                        if (stepSel && stepSel.value) {
+                            loadExpandResponses(selectedQuestionId, stepSel.value);
+                            loadExpandLengthDistribution(selectedQuestionId, stepSel.value);
+                        }
                     }
-                }
-            }, REFRESH_INTERVAL_MS);
-        })();
-        
-        // Tab switching
-        function setupTabs() {
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.dataset.tab;
-                    
-                    // Update tab buttons
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Update tab content
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(tabName).classList.add('active');
                 });
+            }
+        });
+        
+        // One-time delegation: clicking any row toggles expand
+        function setupTableRowClicks() {
+            var tbody = document.getElementById('questionsTableBody');
+            if (!tbody) return;
+            tbody.addEventListener('click', function(e) {
+                var tr = e.target.closest('tr');
+                if (!tr) return;
+                // Support both data-question-id (HTML) and dataset.questionId (IE/edge)
+                var qid = tr.getAttribute('data-question-id') || tr.dataset.questionId;
+                if (!qid) return;
+                var stepsJson = tr.getAttribute('data-steps') || tr.dataset.steps || '[]';
+                var steps = [];
+                try { steps = JSON.parse(stepsJson); } catch(err) {}
+                toggleExpandRow(qid, steps, tr);
             });
+        }
+        
+        function formatPct(v) {
+            if (v == null) return '—';
+            return (v * 100).toFixed(1) + '%';
+        }
+        function formatDiff(v) {
+            if (v == null) return '—';
+            var s = (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%';
+            return s;
+        }
+        
+        function loadTable() {
+            var tbody = document.getElementById('questionsTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">Loading table...</td></tr>';
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA && window.ROLLOUT_VIZ_EMBEDDED_DATA.tableRows) {
+                allTableRows = window.ROLLOUT_VIZ_EMBEDDED_DATA.tableRows;
+                renderTableBody(allTableRows);
+                return;
+            }
+            fetch('/api/table')
+                .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)))
+                .then(rows => {
+                    allTableRows = rows || [];
+                    renderTableBody(allTableRows);
+                })
+                .catch(err => {
+                    tbody.innerHTML = '<tr><td colspan="7" class="error">Error loading table: ' + escapeHtml(err.message) + '</td></tr>';
+                });
+        }
+        
+        function buildTableFromQuestions() {
+            if (!allQuestions || !allQuestions.length) {
+                document.getElementById('questionsTableBody').innerHTML = '<tr><td colspan="7" class="empty-state">No questions found</td></tr>';
+                return;
+            }
+            var rows = allQuestions.map(function(q) {
+                var steps = q.steps || [];
+                var firstStep = steps.length ? steps[0] : null;
+                var lastStep = steps.length ? steps[steps.length - 1] : null;
+                var initial = q.first_step_accuracy;
+                var latest = q.last_step_accuracy;
+                if (initial == null && firstStep != null && q.accuracy_by_step) initial = q.accuracy_by_step[firstStep];
+                if (latest == null && lastStep != null && q.accuracy_by_step) latest = q.accuracy_by_step[lastStep];
+                if (initial == null) initial = q.average_accuracy;
+                if (latest == null) latest = q.average_accuracy;
+                var diff = (initial != null && latest != null) ? latest - initial : null;
+                var overall = q.average_accuracy != null ? q.average_accuracy : (q.total_correct != null && q.total_rollouts ? q.total_correct / q.total_rollouts : null);
+                return {
+                    question_id: q.id,
+                    user_question: q.user_question || '',
+                    initial_difficulty: initial,
+                    latest_difficulty: latest,
+                    difference: diff,
+                    overall_accuracy: overall,
+                    first_step: firstStep,
+                    last_step: lastStep,
+                    steps: steps
+                };
+            });
+            rows.sort(function(a, b) {
+                var oa = a.overall_accuracy != null ? a.overall_accuracy : -1;
+                var ob = b.overall_accuracy != null ? b.overall_accuracy : -1;
+                return ob - oa;
+            });
+            allTableRows = rows;
+            renderTableBody(rows);
+        }
+        
+        function ensureDetailInPlaceholder() {
+            var detail = document.getElementById('expandableDetail');
+            var placeholder = document.getElementById('expandableDetailPlaceholder');
+            if (detail && placeholder && detail.parentElement !== placeholder) {
+                placeholder.appendChild(detail);
+            }
+        }
+
+        function renderTableBody(rows) {
+            ensureDetailInPlaceholder();
+            selectedQuestionId = null;
+            var detail = document.getElementById('expandableDetail');
+            if (detail) {
+                detail.classList.remove('visible');
+                detail.style.display = 'none';
+            }
+            var tbody = document.getElementById('questionsTableBody');
+            var query = (document.getElementById('tableSearch') || {}).value || '';
+            var q = query.toLowerCase().trim();
+            if (q) {
+                rows = rows.filter(function(r) {
+                    return (r.question_id || '').toLowerCase().includes(q) ||
+                           (r.user_question || '').toLowerCase().includes(q);
+                });
+            }
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No questions match</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map(function(r) {
+                var diff = r.difference;
+                var diffClass = diff != null ? (diff > 0 ? 'positive' : diff < 0 ? 'negative' : '') : '';
+                var preview = (r.user_question || '').slice(0, 320);
+                if ((r.user_question || '').length > 320) preview += '…';
+                return '<tr data-question-id="' + escapeHtml(r.question_id) + '" data-steps="' + escapeHtml(JSON.stringify(r.steps || [])) + '">' +
+                    '<td class="expand-cell"><span class="expand-icon">▶</span></td>' +
+                    '<td class="col-id">' + escapeHtml(r.question_id) + '</td>' +
+                    '<td class="col-question" title="' + escapeHtml(r.user_question || '') + '">' + escapeHtml(preview) + '</td>' +
+                    '<td class="col-num">' + formatPct(r.overall_accuracy) + '</td>' +
+                    '<td class="col-num">' + formatPct(r.initial_difficulty) + '</td>' +
+                    '<td class="col-num">' + formatPct(r.latest_difficulty) + '</td>' +
+                    '<td class="col-diff ' + diffClass + '">' + formatDiff(diff) + '</td></tr>';
+            }).join('');
+        }
+        
+        function toggleExpandRow(questionId, steps, rowEl) {
+            var detail = document.getElementById('expandableDetail');
+            var placeholder = document.getElementById('expandableDetailPlaceholder');
+            if (!detail || !placeholder) return;
+            var wasExpanded = selectedQuestionId === questionId;
+            document.querySelectorAll('.data-table tbody tr').forEach(function(r) { r.classList.remove('expanded'); });
+            ensureDetailInPlaceholder();
+            if (wasExpanded) {
+                selectedQuestionId = null;
+                detail.classList.remove('visible');
+                detail.style.display = 'none';
+                return;
+            }
+            selectedQuestionId = questionId;
+            rowEl.classList.add('expanded');
+            detail.classList.add('visible');
+            detail.style.display = 'block';
+            placeholder.appendChild(detail);
+            var stepSelect = document.getElementById('expandStepSelect');
+            stepSelect.innerHTML = '<option value="">— Select step —</option>';
+            (steps || []).forEach(function(s) {
+                var opt = document.createElement('option');
+                opt.value = String(s);
+                opt.textContent = 'Step ' + s;
+                stepSelect.appendChild(opt);
+            });
+            document.getElementById('expandStepContent').style.display = 'none';
+            var rawQuestionEl = document.getElementById('expandRawQuestionText');
+            if (rawQuestionEl) {
+                if (window.ROLLOUT_VIZ_EMBEDDED_DATA && window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo) {
+                    var info = window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo[questionId] || {};
+                    var text = info.user_question || '';
+                    rawQuestionEl.textContent = text ? previewAtWordBoundary(text, 420) : '';
+                    if (!text) rawQuestionEl.innerHTML = '<span class="empty-state">No question text</span>';
+                } else {
+                    rawQuestionEl.innerHTML = '<span class="loading">Loading…</span>';
+                    fetch('/api/question_info/' + questionId)
+                        .then(function(r) { return r.json(); })
+                        .then(function(info) {
+                            var text = info.user_question || '';
+                            rawQuestionEl.textContent = text ? previewAtWordBoundary(text, 420) : '';
+                            if (!text) rawQuestionEl.innerHTML = '<span class="empty-state">No question text</span>';
+                        })
+                        .catch(function() { rawQuestionEl.innerHTML = '<span class="error">Failed to load question text</span>'; });
+                }
+            }
+            loadQuestionPlot(questionId);
+            requestAnimationFrame(function() {
+                detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+            stepSelect.onchange = function() {
+                var step = this.value;
+                if (!step) {
+                    document.getElementById('expandStepContent').style.display = 'none';
+                    return;
+                }
+                document.getElementById('expandStepContent').style.display = 'block';
+                loadExpandResponses(questionId, step);
+                loadExpandLengthDistribution(questionId, step);
+                var infoBox = document.getElementById('expandQuestionInfoBox');
+                if (window.ROLLOUT_VIZ_EMBEDDED_DATA && window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo) {
+                    var info = window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo[questionId] || {};
+                    renderQuestionInfoBox(infoBox, info.user_question || '', info.ground_truth || '');
+                } else {
+                    fetch('/api/question_info/' + questionId).then(function(r) { return r.json(); }).then(function(info) {
+                        renderQuestionInfoBox(infoBox, info.user_question || '', info.ground_truth || '');
+                    });
+                }
+            };
+        }
+        
+        function loadExpandResponses(questionId, step) {
+            var container = document.getElementById('expandResponsesContainer');
+            container.innerHTML = '<div class="loading">Loading responses...</div>';
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
+                var respList = (d.responses && d.responses[questionId] && d.responses[questionId][String(step)]) || [];
+                if (respList.length) {
+                    container.innerHTML = respList.map(function(resp, idx) {
+                        var output = escapeHtml(resp.output);
+                        output = renderBold(output);
+                        output = renderAsymptote(output);
+                        return '<div class="response-card ' + (resp.correct ? 'correct' : 'incorrect') + '">' +
+                            '<div class="response-header"><span>Response ' + (idx + 1) + '</span>' +
+                            '<span class="response-status ' + (resp.correct ? 'correct' : 'incorrect') + '">' + (resp.correct ? 'Correct' : 'Incorrect') + '</span></div>' +
+                            '<div class="response-text">' + output + '</div></div>';
+                    }).join('');
+                    renderMathJax(container.querySelectorAll('.response-text'));
+                } else {
+                    container.innerHTML = '<div class="empty-state">No responses for this step</div>';
+                }
+                return;
+            }
+            fetch('/api/responses/' + questionId + '/' + step)
+                .then(r => r.json())
+                .then(function(data) {
+                    if (data.responses && data.responses.length) {
+                        container.innerHTML = data.responses.map(function(resp, idx) {
+                            var output = escapeHtml(resp.output);
+                            output = renderBold(output);
+                            output = renderAsymptote(output);
+                            return '<div class="response-card ' + (resp.correct ? 'correct' : 'incorrect') + '">' +
+                                '<div class="response-header"><span>Response ' + (idx + 1) + '</span>' +
+                                '<span class="response-status ' + (resp.correct ? 'correct' : 'incorrect') + '">' + (resp.correct ? 'Correct' : 'Incorrect') + '</span></div>' +
+                                '<div class="response-text">' + output + '</div></div>';
+                        }).join('');
+                        renderMathJax(container.querySelectorAll('.response-text'));
+                    } else {
+                        container.innerHTML = '<div class="empty-state">No responses for this step</div>';
+                    }
+                })
+                .catch(function() { container.innerHTML = '<div class="error">Error loading responses</div>'; });
+        }
+        
+        function loadExpandLengthDistribution(questionId, step) {
+            var el = document.getElementById('expandLengthDistribution');
+            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
+                var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
+                var dist = (d.lengthDistributions && d.lengthDistributions[questionId] && d.lengthDistributions[questionId][String(step)]) || null;
+                renderLengthDistribution(el, dist);
+                return;
+            }
+            fetch('/api/rollout_length_distribution/' + questionId + '/' + step)
+                .then(r => r.json())
+                .then(function(dist) { renderLengthDistribution(el, dist); })
+                .catch(function() { el.innerHTML = '<div class="error">Error loading length distribution</div>'; });
+        }
+        
+        function renderLengthDistribution(container, dist) {
+            if (!dist || !dist.lengths || !dist.lengths.length) {
+                container.innerHTML = '<div class="empty-state">No length data</div>';
+                return;
+            }
+            var lengths = dist.lengths;
+            var minVal = dist.min != null ? dist.min : Math.min.apply(null, lengths);
+            var maxVal = dist.max != null ? dist.max : Math.max.apply(null, lengths);
+            var mean = dist.mean != null ? dist.mean : (lengths.reduce(function(a,b){ return a+b; }, 0) / lengths.length).toFixed(2);
+            var hist = lengths.slice().sort(function(a,b){ return a - b; });
+            var bins = 15;
+            var range = (maxVal - minVal) || 1;
+            var binStep = range / bins;
+            var counts = [];
+            var binEdges = [];
+            for (var i = 0; i <= bins; i++) {
+                binEdges.push(Math.round(minVal + i * binStep));
+            }
+            for (var i = 0; i < bins; i++) counts[i] = 0;
+            hist.forEach(function(l) {
+                var idx = Math.min(Math.floor((l - minVal) / (binStep || 1)), bins - 1);
+                if (idx < 0) idx = 0;
+                counts[idx]++;
+            });
+            var maxCount = Math.max.apply(null, counts);
+            var bars = counts.map(function(c, i) {
+                var h = maxCount ? (c / maxCount * 100) : 0;
+                var lo = binEdges[i];
+                var hi = binEdges[i + 1];
+                var bucketLabel = 'Length ' + lo + '–' + hi + ' chars: ' + c + ' rollout' + (c === 1 ? '' : 's');
+                return '<div class="histogram-bar" style="height:' + h + '%" title="' + bucketLabel + '"></div>';
+            }).join('');
+            var yTicks = [];
+            if (maxCount <= 5) {
+                for (var i = 0; i <= maxCount; i++) yTicks.push(i);
+            } else {
+                var step = Math.ceil(maxCount / 4);
+                for (var i = 0; i <= maxCount; i += step) yTicks.push(i);
+                if (yTicks[yTicks.length - 1] !== maxCount) yTicks.push(maxCount);
+            }
+            var yAxisHtml = yTicks.slice().reverse().map(function(t) { return '<span>' + t + '</span>'; }).join('');
+            var xTickStep = Math.max(1, Math.floor(bins / 5));
+            var xTicksHtml = [];
+            for (var i = 0; i <= bins; i += xTickStep) {
+                xTicksHtml.push('<span>' + binEdges[i] + '</span>');
+            }
+            if (xTickStep * (xTicksHtml.length - 1) < bins) {
+                xTicksHtml.push('<span>' + binEdges[bins] + '</span>');
+            }
+            var tokenInfo = dist.mean_tokens != null ? '<span>Mean tokens: ' + dist.mean_tokens + '</span>' : '';
+            container.innerHTML = '<div class="stats-row">' +
+                '<span>Count: ' + lengths.length + '</span>' +
+                '<span>Min length: ' + minVal + ' chars</span>' +
+                '<span>Max length: ' + maxVal + ' chars</span>' +
+                '<span>Mean length: ' + mean + ' chars</span>' +
+                tokenInfo + '</div>' +
+                '<div class="histogram-wrap">' +
+                '<div class="histogram-y-label">Count</div>' +
+                '<div class="histogram-chart">' +
+                '<div class="histogram-y-axis">' + yAxisHtml + '</div>' +
+                '<div class="histogram">' + bars + '</div>' +
+                '</div>' +
+                '<div class="histogram-x-label">Response length (chars)</div>' +
+                '<div class="histogram-x-axis">' + xTicksHtml.join('') + '</div>' +
+                '</div>';
         }
         
         // Load status
@@ -667,15 +1215,13 @@
                     return r.json();
                 })
                 .then(data => {
-                    console.log('Status data:', data);
                     document.getElementById('totalQuestions').textContent = data.question_count || 0;
                     document.getElementById('totalSteps').textContent = data.steps ? data.steps.length : 0;
                     document.getElementById('totalRollouts').textContent = data.total_entries || 0;
                     allSteps = data.steps || [];
                     
-                    // If no data, show error message
                     if (!data.has_data) {
-                        console.warn('No data loaded. Check if pope-guide-7B directory exists.');
+                        /* No data loaded yet; user can refresh when data is available */
                     }
                 })
                 .catch(err => {
@@ -686,35 +1232,12 @@
                 });
         }
         
-        // Load questions
-        function loadQuestions() {
-            const grid = document.getElementById('questionsGrid');
-            grid.innerHTML = '<div class="loading">Loading questions...</div>';
-            
-            fetch('/api/questions')
-                .then(r => {
-                    console.log('Questions API response status:', r.status);
-                    if (!r.ok) {
-                        return r.text().then(text => {
-                            console.error('API error response:', text);
-                            throw new Error(`HTTP error! status: ${r.status}, body: ${text.substring(0, 200)}`);
-                        });
-                    }
-                    return r.json();
-                })
-                .then(questions => {
-                    console.log('Loaded questions:', questions);
-                    console.log('Questions count:', questions ? questions.length : 0);
-                    if (questions && questions.length > 0) {
-                        console.log('First question:', questions[0]);
-                    }
-                    allQuestions = questions || [];
-                    renderQuestions(allQuestions);
-                })
-                .catch(err => {
-                    console.error('Error loading questions:', err);
-                    grid.innerHTML = '<div class="error">Error loading questions: ' + err.message + '<br>Check browser console for details.</div>';
-                });
+        function setupTableSearch() {
+            var searchEl = document.getElementById('tableSearch');
+            if (!searchEl) return;
+            searchEl.addEventListener('input', function() {
+                renderTableBody(allTableRows);
+            });
         }
         
         // Utility function
@@ -723,6 +1246,13 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+        function previewAtWordBoundary(text, maxLen) {
+            if (!text || text.length <= maxLen) return text;
+            var cut = text.slice(0, maxLen);
+            var lastSpace = cut.lastIndexOf(' ');
+            if (lastSpace > maxLen * 0.6) cut = cut.slice(0, lastSpace);
+            return cut.trim() + '\u2026';
         }
         
         // Function to render question info box (reusable component)
@@ -760,117 +1290,6 @@
             renderMathJax(mathElements);
         }
         
-        // Render questions
-        function renderQuestions(questions) {
-            const grid = document.getElementById('questionsGrid');
-            
-            if (!questions || questions.length === 0) {
-                grid.innerHTML = '<div class="empty-state">No questions found</div>';
-                return;
-            }
-            
-            console.log('Rendering questions:', questions.length);
-            console.log('Sample question:', questions[0]);
-            
-            grid.innerHTML = questions.map((q) => {
-                const questionText = q.user_question || 'No question text available';
-                const preview = questionText.length > 150 ? questionText.substring(0, 150) + '...' : questionText;
-                const questionId = q.id || 'unknown';
-                const questionNumber = q.question_number || 0;
-                const idDisplay = questionId.length > 8 ? questionId.substring(0, 8) + '...' : questionId;
-                const difficulty = q.difficulty || 'unknown';
-                const avgAccuracy = q.average_accuracy !== undefined ? (q.average_accuracy * 100).toFixed(1) : 'N/A';
-                
-                return `
-                    <div class="question-card" data-question-id="${questionId}" data-question-number="${questionNumber}" data-difficulty="${difficulty}">
-                        <div class="question-id">
-                            <span>Question ${questionNumber} (ID: ${idDisplay})</span>
-                            <span>
-                                <span class="difficulty-badge ${difficulty}">${difficulty}</span>
-                                <span class="accuracy-indicator">${avgAccuracy}%</span>
-                            </span>
-                        </div>
-                        <div class="question-preview" data-math-content="${escapeHtml(preview)}">${escapeHtml(preview)}</div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Trigger MathJax rendering for question previews
-            const previews = grid.querySelectorAll('.question-preview');
-            renderMathJax(previews);
-            
-            // Add click handlers
-            document.querySelectorAll('.question-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    const questionId = this.dataset.questionId;
-                    selectQuestion(questionId);
-                });
-            });
-        }
-        
-        // Select question
-        function selectQuestion(questionId) {
-            selectedQuestionId = questionId;
-            
-            // Update card selection
-            document.querySelectorAll('.question-card').forEach(card => {
-                card.classList.toggle('selected', card.dataset.questionId === questionId);
-            });
-            
-            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
-                var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
-                var info = (d.questionInfo && d.questionInfo[questionId]) || {};
-                const detail = document.getElementById('questionDetail');
-                const questionNumber = allQuestions.find(q => q.id === questionId)?.question_number || 0;
-                document.getElementById('questionDetailTitle').textContent = `Question ${questionNumber}`;
-                const questionInfoBox = document.getElementById('questionInfoBox');
-                renderQuestionInfoBox(questionInfoBox, info.user_question || 'No question text available', info.ground_truth);
-                detail.style.display = 'block';
-                updateStepSelectorForQuestion(info.steps || []);
-                loadQuestionPlot(questionId);
-                return;
-            }
-            
-            // Load question details
-            fetch(`/api/question_info/${questionId}`)
-                .then(r => r.json())
-                .then(info => {
-                    const detail = document.getElementById('questionDetail');
-                    const questionNumber = allQuestions.find(q => q.id === questionId)?.question_number || 0;
-                    document.getElementById('questionDetailTitle').textContent = `Question ${questionNumber}`;
-                    
-                    // Render question info box
-                    const questionInfoBox = document.getElementById('questionInfoBox');
-                    renderQuestionInfoBox(questionInfoBox, info.user_question || 'No question text available', info.ground_truth);
-                    
-                    detail.style.display = 'block';
-                    
-                    // Update step selector for responses tab with only steps where this question was sampled
-                    updateStepSelectorForQuestion(info.steps || []);
-                    
-                    // Load plot
-                    loadQuestionPlot(questionId);
-                })
-                .catch(err => console.error('Error loading question info:', err));
-        }
-        
-        // Update step selector to only show steps where the question was sampled
-        function updateStepSelectorForQuestion(questionSteps) {
-            const select = document.getElementById('responseStepSelect');
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">-- Select a Step --</option>';
-            questionSteps.forEach(step => {
-                const option = document.createElement('option');
-                option.value = step;
-                option.textContent = `Step ${step}`;
-                select.appendChild(option);
-            });
-            // Restore previous selection if it's still valid
-            if (currentValue && questionSteps.includes(parseInt(currentValue))) {
-                select.value = currentValue;
-            }
-        }
-        
         // Load question plot
         function loadQuestionPlot(questionId) {
             const container = document.getElementById('questionPlot');
@@ -896,256 +1315,6 @@
                 });
         }
         
-        // Setup search and filter
-        function setupSearch() {
-            const searchBox = document.getElementById('questionSearch');
-            const difficultyFilter = document.getElementById('difficultyFilter');
-            
-            function applyFilters() {
-                const query = searchBox.value.toLowerCase();
-                const difficulty = difficultyFilter.value;
-                
-                if (!allQuestions || allQuestions.length === 0) {
-                    return;
-                }
-                
-                let filtered = allQuestions.filter(q => {
-                    // Search filter
-                    const matchesSearch = query === '' || 
-                        (q.id || '').toLowerCase().includes(query) ||
-                        (q.user_question || '').toLowerCase().includes(query) ||
-                        (q.ground_truth || '').toLowerCase().includes(query);
-                    
-                    // Difficulty filter
-                    const matchesDifficulty = difficulty === 'all' || (q.difficulty || '') === difficulty;
-                    
-                    return matchesSearch && matchesDifficulty;
-                });
-                
-                renderQuestions(filtered);
-            }
-            
-            searchBox.addEventListener('input', applyFilters);
-            difficultyFilter.addEventListener('change', applyFilters);
-        }
-        
-        // Load steps
-        function loadSteps() {
-            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
-                allSteps = window.ROLLOUT_VIZ_EMBEDDED_DATA.status && window.ROLLOUT_VIZ_EMBEDDED_DATA.status.steps || [];
-                var select = document.getElementById('responseStepSelect');
-                select.innerHTML = '<option value="">-- Select a Step --</option>';
-                allSteps.forEach(function(step) {
-                    var option = document.createElement('option');
-                    option.value = step;
-                    option.textContent = 'Step ' + step;
-                    select.appendChild(option);
-                });
-                return;
-            }
-            fetch('/api/steps')
-                .then(r => r.json())
-                .then(steps => {
-                    allSteps = steps;
-                    const select = document.getElementById('responseStepSelect');
-                    select.innerHTML = '<option value="">-- Select a Step --</option>';
-                    steps.forEach(step => {
-                        const option = document.createElement('option');
-                        option.value = step;
-                        option.textContent = `Step ${step}`;
-                        select.appendChild(option);
-                    });
-                })
-                .catch(err => console.error('Error loading steps:', err));
-        }
-        
-        // Load question IDs for response selector
-        function loadResponseQuestions() {
-            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
-                var questions = window.ROLLOUT_VIZ_EMBEDDED_DATA.questions || allQuestions;
-                var select = document.getElementById('responseQuestionSelect');
-                select.innerHTML = '<option value="">-- Select a Question --</option>';
-                questions.forEach(function(q) {
-                    var option = document.createElement('option');
-                    option.value = q.id;
-                    var questionNumber = q.question_number || 0;
-                    var idDisplay = q.id.length > 8 ? q.id.substring(0, 8) + '...' : q.id;
-                    option.textContent = 'Question ' + questionNumber + ' (' + idDisplay + ')';
-                    option.dataset.questionNumber = questionNumber;
-                    select.appendChild(option);
-                });
-                return;
-            }
-            fetch('/api/questions')
-                .then(r => {
-                    if (!r.ok) {
-                        throw new Error(`HTTP error! status: ${r.status}`);
-                    }
-                    return r.json();
-                })
-                .then(questions => {
-                    console.log('Loaded questions for selector:', questions.length);
-                    const select = document.getElementById('responseQuestionSelect');
-                    select.innerHTML = '<option value="">-- Select a Question --</option>';
-                    questions.forEach(q => {
-                        const option = document.createElement('option');
-                        option.value = q.id;
-                        const questionNumber = q.question_number || 0;
-                        const idDisplay = q.id.length > 8 ? q.id.substring(0, 8) + '...' : q.id;
-                        option.textContent = `Question ${questionNumber} (${idDisplay})`;
-                        option.dataset.questionNumber = questionNumber;
-                        select.appendChild(option);
-                    });
-                })
-                .catch(err => {
-                    console.error('Error loading questions:', err);
-                    const select = document.getElementById('responseQuestionSelect');
-                    select.innerHTML = '<option value="">Error loading questions</option>';
-                });
-        }
-        
-        // Load responses
-        function loadResponses(questionId, step) {
-            const container = document.getElementById('responsesContainer');
-            container.innerHTML = '<div class="loading">Loading responses...</div>';
-            
-            if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
-                var d = window.ROLLOUT_VIZ_EMBEDDED_DATA;
-                var respList = (d.responses && d.responses[questionId] && d.responses[questionId][String(step)]) || [];
-                var info = (d.questionInfo && d.questionInfo[questionId]) || {};
-                if (respList.length > 0) {
-                    var questionInfoBox = document.getElementById('responseQuestionInfoBox');
-                    renderQuestionInfoBox(questionInfoBox, info.user_question || '', info.ground_truth || '');
-                    questionInfoBox.style.display = 'block';
-                    var html = respList.map(function(resp, idx) {
-                        var output = escapeHtml(resp.output);
-                        output = renderBold(output);
-                        output = renderAsymptote(output);
-                        return '<div class="response-card ' + (resp.correct ? 'correct' : 'incorrect') + '">' +
-                            '<div class="response-header"><span>Response ' + (idx + 1) + '</span>' +
-                            '<span class="response-status ' + (resp.correct ? 'correct' : 'incorrect') + '">' + (resp.correct ? 'Correct' : 'Incorrect') + '</span></div>' +
-                            '<div class="response-text">' + output + '</div></div>';
-                    }).join('');
-                    container.innerHTML = html;
-                    var mathElements = container.querySelectorAll('.response-text');
-                    renderMathJax(mathElements);
-                } else {
-                    document.getElementById('responseQuestionInfoBox').style.display = 'none';
-                    container.innerHTML = '<div class="empty-state">No responses found for this question and step</div>';
-                }
-                return;
-            }
-            
-            fetch(`/api/responses/${questionId}/${step}`)
-                .then(r => r.json())
-                .then(data => {
-                    console.log('Response data:', {
-                        question_id: data.question_id,
-                        step: data.step,
-                        user_question_preview: data.user_question ? data.user_question.substring(0, 100) : 'MISSING',
-                        ground_truth: data.ground_truth,
-                        response_count: data.responses ? data.responses.length : 0
-                    });
-                    
-                    if (data.responses && data.responses.length > 0) {
-                        // Show question info box at the top
-                        const questionInfoBox = document.getElementById('responseQuestionInfoBox');
-                        if (!data.user_question) {
-                            console.error('Missing user_question in response data!');
-                        }
-                        renderQuestionInfoBox(questionInfoBox, data.user_question || '', data.ground_truth || '');
-                        questionInfoBox.style.display = 'block';
-                        
-                        // Build responses HTML - apply bold/asymptote formatting to output
-                        let html = data.responses.map((resp, idx) => {
-                            // Escape HTML first, then apply formatting
-                            let output = escapeHtml(resp.output);
-                            output = renderBold(output);
-                            output = renderAsymptote(output);
-                            return `
-                                <div class="response-card ${resp.correct ? 'correct' : 'incorrect'}">
-                                    <div class="response-header">
-                                        <span>Response ${idx + 1}</span>
-                                        <span class="response-status ${resp.correct ? 'correct' : 'incorrect'}">
-                                            ${resp.correct ? 'Correct' : 'Incorrect'}
-                                        </span>
-                                    </div>
-                                    <div class="response-text">${output}</div>
-                                </div>
-                            `;
-                        }).join('');
-                        
-                        container.innerHTML = html;
-                        
-                        // Trigger MathJax rendering for response texts (LaTeX in outputs)
-                        const mathElements = container.querySelectorAll('.response-text');
-                        renderMathJax(mathElements);
-                    } else {
-                        document.getElementById('responseQuestionInfoBox').style.display = 'none';
-                        container.innerHTML = '<div class="empty-state">No responses found for this question and step</div>';
-                    }
-                })
-                .catch(err => {
-                    container.innerHTML = '<div class="error">Error loading responses: ' + err.message + '</div>';
-                });
-        }
-        
-        // Setup response selectors
-        document.getElementById('responseQuestionSelect').addEventListener('change', function() {
-            const questionId = this.value;
-            if (questionId) {
-                if (window.ROLLOUT_VIZ_EMBEDDED_DATA) {
-                    var info = (window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo && window.ROLLOUT_VIZ_EMBEDDED_DATA.questionInfo[questionId]) || {};
-                    updateStepSelectorForQuestion(info.steps || []);
-                    var questionInfoBox = document.getElementById('responseQuestionInfoBox');
-                    renderQuestionInfoBox(questionInfoBox, info.user_question || '', info.ground_truth || '');
-                    questionInfoBox.style.display = 'block';
-                    var step = document.getElementById('responseStepSelect').value;
-                    if (step) loadResponses(questionId, step);
-                    else document.getElementById('responsesContainer').innerHTML = '<div class="empty-state">Select a training step to view responses</div>';
-                    return;
-                }
-                // Load question info to get available steps and show question box
-                fetch(`/api/question_info/${questionId}`)
-                    .then(r => r.json())
-                    .then(info => {
-                        updateStepSelectorForQuestion(info.steps || []);
-                        
-                        // Show question info box
-                        const questionInfoBox = document.getElementById('responseQuestionInfoBox');
-                        renderQuestionInfoBox(questionInfoBox, info.user_question || '', info.ground_truth || '');
-                        questionInfoBox.style.display = 'block';
-                        
-                        const step = document.getElementById('responseStepSelect').value;
-                        if (step) {
-                            loadResponses(questionId, step);
-                        } else {
-                            // Clear responses if no step selected
-                            document.getElementById('responsesContainer').innerHTML = '<div class="empty-state">Select a training step to view responses</div>';
-                        }
-                    })
-                    .catch(err => console.error('Error loading question info:', err));
-            } else {
-                // Reset step selector to all steps and hide question box
-                document.getElementById('responseQuestionInfoBox').style.display = 'none';
-                document.getElementById('responsesContainer').innerHTML = '<div class="empty-state">Select a question and training step to view responses</div>';
-                loadSteps();
-            }
-        });
-        
-        document.getElementById('responseStepSelect').addEventListener('change', function() {
-            const step = this.value;
-            const questionId = document.getElementById('responseQuestionSelect').value;
-            if (questionId && step) {
-                loadResponses(questionId, step);
-            }
-        });
-        
-        // Load response questions on tab switch
-        document.querySelector('[data-tab="responses"]').addEventListener('click', function() {
-            loadResponseQuestions();
-            loadSteps();
-        });
     </script>
 </body>
 </html>

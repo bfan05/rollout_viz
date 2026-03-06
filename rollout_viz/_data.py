@@ -6,7 +6,7 @@ import re
 import hashlib
 import glob
 from collections import defaultdict
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 
 def normalize_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
@@ -182,10 +182,97 @@ def get_responses_at_step(
     out = []
     for e in data:
         if e.get("question_id") == question_id and e.get("step") == step:
+            output_text = e.get("output", "")
             out.append({
-                "output": e.get("output", ""),
+                "output": output_text,
                 "score": e.get("score", 0.0),
                 "ground_truth": e.get("gts", ""),
                 "correct": e.get("score", 0.0) == 1.0,
+                "length": len(output_text),  # character length; token count if present
+                "length_tokens": e.get("response_length") or e.get("output_length"),
             })
     return out
+
+
+def get_initial_and_latest_accuracy(
+    data: List[Dict[str, Any]], question_id: str
+) -> Tuple[Optional[float], Optional[float], Optional[int], Optional[int]]:
+    """
+    For a question, return (initial_accuracy, latest_accuracy, first_step, last_step).
+    Initial = accuracy on the first training step this question was used; latest = on the last.
+    """
+    question_data = [e for e in data if e.get("question_id") == question_id]
+    if not question_data:
+        return None, None, None, None
+    steps = sorted(set(e.get("step", 0) for e in question_data if e.get("step", 0) > 0))
+    if not steps:
+        return None, None, None, None
+    first_step = steps[0]
+    last_step = steps[-1]
+    acc_by_step = calculate_accuracy_over_time(data, question_id=question_id)
+    initial_acc = acc_by_step.get(first_step)
+    latest_acc = acc_by_step.get(last_step)
+    return initial_acc, latest_acc, first_step, last_step
+
+
+def get_table_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    One row per question: question_id, user_question, initial_difficulty, latest_difficulty,
+    difference (latest - initial), overall_accuracy, first_step, last_step.
+    """
+    qids = get_question_ids(data)
+    rows = []
+    for qid in qids:
+        info = get_question_info(data, qid)
+        initial_acc, latest_acc, first_step, last_step = get_initial_and_latest_accuracy(data, qid)
+        user_question = info.get("user_question", "")
+        # difference = latest - initial (None if either missing)
+        diff = None
+        if initial_acc is not None and latest_acc is not None:
+            diff = round(latest_acc - initial_acc, 4)
+        question_entries = [e for e in data if e.get("question_id") == qid]
+        total = len(question_entries)
+        correct = sum(1 for e in question_entries if e.get("score", 0.0) == 1.0)
+        overall_accuracy = correct / total if total else None
+        rows.append({
+            "question_id": qid,
+            "user_question": user_question,
+            "initial_difficulty": initial_acc,
+            "latest_difficulty": latest_acc,
+            "difference": diff,
+            "overall_accuracy": round(overall_accuracy, 4) if overall_accuracy is not None else None,
+            "first_step": first_step,
+            "last_step": last_step,
+            "steps": info.get("steps", []),
+        })
+    # Sort by overall accuracy descending (highest first)
+    def sort_key(r):
+        oa = r.get("overall_accuracy")
+        if oa is None:
+            return -1.0
+        return -oa
+    rows.sort(key=sort_key)
+    return rows
+
+
+def get_rollout_length_distribution(
+    data: List[Dict[str, Any]], question_id: str, step: int
+) -> Dict[str, Any]:
+    """
+    Return rollout length stats at (question_id, step). Uses character length;
+    if entries have response_length/output_length (token count), include that too.
+    """
+    responses = get_responses_at_step(data, question_id, step)
+    lengths_chars = [r["length"] for r in responses]
+    lengths_tokens = [r.get("length_tokens") for r in responses if r.get("length_tokens") is not None]
+    result = {
+        "lengths": lengths_chars,
+        "count": len(lengths_chars),
+        "min": min(lengths_chars) if lengths_chars else None,
+        "max": max(lengths_chars) if lengths_chars else None,
+        "mean": round(sum(lengths_chars) / len(lengths_chars), 2) if lengths_chars else None,
+    }
+    if lengths_tokens:
+        result["lengths_tokens"] = lengths_tokens
+        result["mean_tokens"] = round(sum(lengths_tokens) / len(lengths_tokens), 2)
+    return result

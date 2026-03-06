@@ -21,33 +21,33 @@ def _generate_plot(
     plt.style.use("default")
 
     if not accuracy_data:
-        fig, ax = plt.subplots(figsize=(11, 6))
+        fig, ax = plt.subplots(figsize=(6, 3.2))
         fig.patch.set_facecolor("white")
         ax.set_facecolor("white")
         ax.text(
             0.5, 0.5, "No data available",
-            ha="center", va="center", transform=ax.transAxes, fontsize=14, color="#666",
+            ha="center", va="center", transform=ax.transAxes, fontsize=12, color="#666",
         )
-        ax.set_xlabel("Training Step", fontsize=12, color="#333")
-        ax.set_ylabel("Accuracy", fontsize=12, color="#333")
+        ax.set_xlabel("Training Step", fontsize=11, color="#333")
+        ax.set_ylabel("Accuracy", fontsize=11, color="#333")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
     else:
         steps = sorted(accuracy_data.keys())
         accuracies = [accuracy_data[s] for s in steps]
-        fig, ax = plt.subplots(figsize=(11, 6))
+        fig, ax = plt.subplots(figsize=(6, 3.2))
         fig.patch.set_facecolor("white")
         ax.set_facecolor("white")
-        color = "#2563eb"
+        color = "#4f46e5"
         ax.plot(
-            steps, accuracies, marker="o", linewidth=2.5, markersize=10,
-            color=color, markerfacecolor=color, markeredgecolor="white", markeredgewidth=2, zorder=3,
+            steps, accuracies, marker="o", linewidth=2, markersize=7,
+            color=color, markerfacecolor=color, markeredgecolor="white", markeredgewidth=1.5, zorder=3,
         )
         ax.fill_between(steps, accuracies, alpha=0.15, color=color, zorder=1)
         if title:
-            ax.set_title(title, fontsize=14, color="#333", fontweight="600", pad=15)
-        ax.set_xlabel("Training Step", fontsize=13, color="#333", fontweight="500", labelpad=10)
-        ax.set_ylabel("Accuracy", fontsize=13, color="#333", fontweight="500", labelpad=10)
+            ax.set_title(title, fontsize=12, color="#333", fontweight="600", pad=10)
+        ax.set_xlabel("Training Step", fontsize=11, color="#333", fontweight="500", labelpad=8)
+        ax.set_ylabel("Accuracy", fontsize=11, color="#333", fontweight="500", labelpad=8)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.spines["left"].set_color("#e5e7eb")
@@ -57,12 +57,13 @@ def _generate_plot(
         y_max = max(accuracies) if accuracies else 1.0
         y_padding = max(0.15, y_max * 0.2)
         ax.set_ylim([0, min(1.05, y_max + y_padding)])
-        if len(steps) > 1:
-            ax.set_xlim([min(steps) - 0.3, max(steps) + 0.3])
-        else:
-            ax.set_xlim([steps[0] - 0.5, steps[0] + 0.5])
-        ax.set_yticklabels([f"{y:.0%}" for y in ax.get_yticks()], fontsize=11, color="#666")
-        ax.set_xticklabels(ax.get_xticks(), fontsize=11, color="#666")
+        # X-axis: integer bounds and only integer ticks (no decimals)
+        step_min, step_max = min(steps), max(steps)
+        ax.set_xlim([step_min - 0.5, step_max + 0.5])
+        from matplotlib.ticker import FixedLocator
+        ax.xaxis.set_major_locator(FixedLocator(steps))
+        ax.tick_params(axis="x", labelsize=10, colors="#666")
+        ax.set_yticklabels([f"{y:.0%}" for y in ax.get_yticks()], fontsize=10, color="#666")
 
     img_buffer = BytesIO()
     fig.savefig(img_buffer, format="png", bbox_inches="tight", dpi=120, facecolor="white", edgecolor="none")
@@ -125,6 +126,27 @@ def create_app(get_data_callback: Callable[[], List[Dict[str, Any]]]) -> Flask:
             "user_question": question_info.get("user_question", ""),
             "ground_truth": question_info.get("ground_truth", ""),
         })
+
+    @app.route("/api/table")
+    def api_table():
+        """Table rows: question_id, user_question, initial_difficulty, latest_difficulty, difference."""
+        try:
+            rows = _data.get_table_rows(data())
+            return jsonify(rows)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/rollout_length_distribution/<question_id>/<int:step>")
+    def api_rollout_length_distribution(question_id, step):
+        try:
+            dist = _data.get_rollout_length_distribution(data(), question_id, step)
+            return jsonify(dist)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
 
     @app.route("/api/steps")
     def api_steps():
